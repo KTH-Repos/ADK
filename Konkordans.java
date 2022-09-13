@@ -35,6 +35,7 @@ class Konkordans {
      * @throws IOException om problem med filerna.
      */
     public static void main(String args[]) throws IOException {
+        long startTime = System.nanoTime();
         //TODO: ÄNDRA NAMN OCH GE EN FÖRKLARING
         createCharValueArray();
 
@@ -55,14 +56,20 @@ class Konkordans {
 
             // Vi läser in RAWINDEX filen och skickar den till createConstructionFiles-metoden.
             createConstructionFiles(Mio.OpenRead(FILE_RAWINDEX));
+            long endTime = System.nanoTime();
             System.out.println("Skapade filer: A.txt, I.txt och L.txt");
+            long totalTime = endTime - startTime;
+            System.out.println("KONSTRUKTIONSPROGRAMMET - Körtid: " + totalTime/1000000000 + " s.");
+            startTime = System.nanoTime();
         }
         // Om filerna redan är skapade läser vi enbart från A.txt till internminnet.
         else {
             loadFromFileA();
         }
 
-        System.out.println("Program slut.");
+        long endTime = System.nanoTime();
+        long totalTime = endTime - startTime;
+        System.out.println("SÖKPROGRAMMET - Körtid: " + totalTime/1000000 + " ms.");
     }
 
     /**
