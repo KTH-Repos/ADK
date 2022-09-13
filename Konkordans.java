@@ -2,6 +2,11 @@ import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
+/*
+ * ADK-2350-LABB 1
+ * Max Israelsson (maxisr@kth.se)
+ * Tomas Yonas Weldetinsae (tywe@kth.se)
+ */
 class Konkordans {
 
     // Filer
@@ -36,6 +41,7 @@ class Konkordans {
      */
     public static void main(String args[]) throws IOException {
         long startTime = System.nanoTime();
+
         //TODO: ÄNDRA NAMN OCH GE EN FÖRKLARING
         createCharValueArray();
 
@@ -140,7 +146,8 @@ class Konkordans {
 
                         // TODO: Osäker vad den här gör helt. Vi kollar om vi kan ändra på den här sen.
                         // Jag tolkar det som att vi lägger ihop dessa så att de får en specifik placering och blir en pekare sen.
-                        iBytePositon += previousWord.length() + getLengthOfInt(previousLBytePosition) + getLengthOfInt(wordOccurs) + 3;
+                        iBytePositon += previousWord.length() + getLengthOfInt(previousLBytePosition)
+                                + getLengthOfInt(wordOccurs) + 3;
 
                         previousWord = currentWord;
                         previousLBytePosition = lBytePositon;
@@ -149,10 +156,10 @@ class Konkordans {
                     // Vi ökar lBytePositon med index-längden plus ett.
                     lBytePositon += indexLength + 1;
 
-                    //Vi ökar wordOccurs med ett. 
+                    //Vi ökar wordOccurs med ett ifall ordet förekommer igen. 
                     wordOccurs++;
 
-                    // (FIL L) - Vi skriver index stringen och gör en newline efteråt med \n (newline),
+                    // (FIL L) - Vi skriver index-stringen och gör en newline efteråt med \n (newline),
                     file_l.write((index + "\n").getBytes(ISO_Latin_1));
                 }
 
@@ -168,7 +175,7 @@ class Konkordans {
                 }
             }
         }
-        // Skriv till fil A. (sparar)
+        // Skriv till fil A. (SPARAR)
         writeToFileA();
     }
     
@@ -184,6 +191,7 @@ class Konkordans {
      * @return det hashade värdet från hash-funktionen.
      */
     private static int wPrefix(String word) {
+
         // Kollar om längden på ordet är mindre än tre.
         if (word.length() < 3) {
 
@@ -288,7 +296,7 @@ class Konkordans {
     /**
      * Läser av innehållet i filen: A.txt
      * 
-     * @throws IOException OM I/O fel.
+     * @throws IOException om filen laddas fel.
      */
     private static void loadFromFileA() throws IOException {
         // (Läser från FIL A)
