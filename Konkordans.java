@@ -29,7 +29,7 @@ class Konkordans {
 
     // TODO : Varför använder vi short för datatyp???
     // Största ascii-värdet i svenska är 246, vilket motsvarar ö
-    private static short[] c = new short[247];
+    private static short[] charMap = new short[247];
 
     // Teckenkodningen som vi ska använda. Det betyder att varje tecken lagras i en
     // byte, vilket är praktiskt när man ska adressera sig till en viss position i
@@ -223,7 +223,7 @@ class Konkordans {
             }
         }
         // Motsvarar: h(w) = f(w[0])*900 + f(w[1])*30 + f(w[2])
-        return c[word.charAt(0)] * (BASE * BASE) + c[word.charAt(1)] * BASE + c[word.charAt(2)];
+        return charMap[word.charAt(0)] * (BASE * BASE) + charMap[word.charAt(1)] * BASE + charMap[word.charAt(2)];
     }
 
     /**
@@ -304,11 +304,14 @@ class Konkordans {
      * This also avoid repeated use of tolower() method on input.
      */
     static void createCharValueArray() {
-        c[(short) 'Ä'] = c[(short) 'ä'] = 27;
-        c[(short) 'Å'] = c[(short) 'å'] = 28;
-        c[(short) 'Ö'] = c[(short) 'ö'] = 29;
+        // Vi tilldelar ä, å, ä (stora och små) dess värde i charMap.
+        charMap[(short) 'Ä'] = charMap[(short) 'ä'] = 27;
+        charMap[(short) 'Å'] = charMap[(short) 'å'] = 28;
+        charMap[(short) 'Ö'] = charMap[(short) 'ö'] = 29;
+
+        // Vi går igenom de resterande bokstäverna (stora och små) och tilldelar dess värde i charMap.
         for (short i = 1; i <= 26; i++) {
-            c['A' + i - 1] = c['a' + i - 1] = i;
+            charMap['A' + i - 1] = charMap['a' + i - 1] = i;
         }
     }
 
