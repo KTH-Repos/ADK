@@ -18,11 +18,11 @@ class Konkordans {
     // private static final File FILE_L = new File("L.txt");
 
     // Filer (KTH)
-    private static final File FILE_RAWINDEX = new File("/afs/kth.se/misc/info/kurser/DD2350/adk22/labb1/rawindex.txt");
-    private static final File FILE_KORPUS = new File("/var/tmp/I.txt");
-    private static final File FILE_A = new File("/var/tmp/A.txt");
-    private static final File FILE_I = new File("/var/tmp/P.txt");
-    private static final File FILE_L = new File("/afs/kth.se/misc/info/kurser/DD2350/adk22/labb1/korpus");
+     private static final File FILE_RAWINDEX = new File("/afs/kth.se/misc/info/kurser/DD2350/adk22/labb1/rawindex.txt");
+     private static final File FILE_KORPUS = new File("/var/tmp/II.txt");
+     private static final File FILE_A = new File("/var/tmp/AA.txt");
+     private static final File FILE_I = new File("/var/tmp/PP.txt");
+     private static final File FILE_L = new File("/afs/kth.se/misc/info/kurser/DD2350/adk22/labb1/korpusKORPUS");
 
     // Basen som vi kommmer att använda till vår hash-funktion. A till ö motsvarar
     // 29 tecken och mellanslag som 1 (totalt 30).
@@ -353,8 +353,7 @@ class Konkordans {
         int first = A[hash];
         int next;
 
-        System.out.println("First: "  + first);
-        System.out.println("Next: " + next);
+        System.out.println("First: " + first);
 
         // Kollar om det hashade värdet motsvarar hashade ööö (slut). Det sista hashade
         // ordet.
@@ -373,6 +372,7 @@ class Konkordans {
                 i++;
             }
         }
+        System.out.println("Next: " + next);
 
         // Vi söker i I-filen
         // [position av första instans i L (0), position av sista instans i L
