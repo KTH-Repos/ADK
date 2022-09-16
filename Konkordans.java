@@ -482,6 +482,7 @@ class Konkordans {
         while (nextBytes - firstBytes > 1000) {
             int mid = firstBytes + ((nextBytes - firstBytes) / 2);
             I.seek(mid);
+            System.out.println("first: " + firstBytes + ", next: " + nextBytes + ", mid: " + mid);
             mid += I.readLine().length() + 1; // To adjust if seek to middle of line
             String midWord = p.split(I.readLine())[0];
             if (midWord.compareTo(searchWord) < 0) {
