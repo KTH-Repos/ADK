@@ -1,6 +1,8 @@
 import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.security.DrbgParameters.NextBytes;
+import java.util.Random;
 import java.util.regex.Pattern;
 
 /*
@@ -24,12 +26,13 @@ class Konkordans {
     // Svaret får innehålla högst 25 rader med förekomster.
     private static final int MAXLINES = 25;
 
-    // Vår int-array A.
+    // Vår int-array A som är lokal.
     private static int[] A = new int[BASE * BASE * BASE];
 
-    // TODO : Varför använder vi short för datatyp???
-    // Största ascii-värdet i svenska är 246, vilket motsvarar ö
-    private static short[] charMap = new short[247];
+    // Största ascii-värdet i svenska är 246, vilket motsvarar ö.
+    // Vi skapar en array för att omvanlda stora och små bokstäver till de olika
+    // värdena som används sedan i wPrefix.
+    private static int[] charMap = new int[247];
 
     // Teckenkodningen som vi ska använda. Det betyder att varje tecken lagras i en
     // byte, vilket är praktiskt när man ska adressera sig till en viss position i
@@ -47,8 +50,10 @@ class Konkordans {
     public static void main(String args[]) throws IOException {
         long startTime = System.nanoTime();
 
-        // TODO: ÄNDRA NAMN OCH GE EN FÖRKLARING
-        createCharValueArray();
+        // Vi använder använder oss utav en förberäknad funktion f som omvandlar dom
+        // tänkbara tecknen som kommer in till siffror,
+        // t.ex “mellanslag”→0, “a”→1, “b”→2, […], “ö”→29.
+        createCharMap();
 
         // Vi kollar ifall längden ifall längden är fel (alltså inte ett).
         if (args.length != 1) {
@@ -63,7 +68,7 @@ class Konkordans {
 
         // Vi kollar ifall filerna finns. Om de inte gör det skapar vi dom i
         // createConstructionFiles-metoden.
-        if (!checkFilesExist()) {
+        if (!checkIfFilesExist()) {
 
             // Vi läser in RAWINDEX filen och skickar den till
             // createConstructionFiles-metoden.
@@ -71,7 +76,8 @@ class Konkordans {
             long endTime = System.nanoTime();
             System.out.println("Skapade filer: A.txt, I.txt och L.txt");
             long totalTime = endTime - startTime;
-            System.out.println("KONSTRUKTIONSPROGRAMMET - Körtid: " + totalTime / 1000000000 + " s.");
+            System.out.printf("KONSTRUKTIONSPROGRAMMET - Körtid: %d s.\n", totalTime / 1000000000);
+
             startTime = System.nanoTime();
         }
         // Om filerna redan är skapade läser vi enbart från A.txt till internminnet.
@@ -80,13 +86,13 @@ class Konkordans {
         }
 
         // Vi söker efter ordet och kollar ifall det finns.
-        if (!searchWord(wordToFind.toLowerCase())) {
+        if (searchWord(wordToFind.toLowerCase())) {
             System.out.println("Ordet '" + wordToFind + "' hittades inte.");
         }
 
         long endTime = System.nanoTime();
         long totalTime = endTime - startTime;
-        System.out.println("SÖKPROGRAMMET - Körtid: " + totalTime / 1000000 + " ms.");
+        System.out.printf("SÖKPROGRAMMET - Körtid: %d ms.\n", totalTime / 1000000);
     }
 
     /**
@@ -94,7 +100,9 @@ class Konkordans {
      * 
      * @return sant eller falskt
      */
-    private static boolean checkFilesExist() {
+    private static boolean checkIfFilesExist() {
+        // (.exists) returns true if and only if the file or directory denoted by this
+        // abstract pathname exists; false otherwise.
         if (FILE_A.exists() && FILE_I.exists() && FILE_L.exists()) {
             return true;
         }
@@ -105,22 +113,24 @@ class Konkordans {
     // KONSTRUKTIONSPROGRAMMET
     // ###########################################################################################################
     /**
-     * Skapar A, I, L filarna som behövs för att kunna söka snabbt sen.
-     * TODO: SKRIV MER HÄR.
+     * Skapar A, I, L filarna.
+     * A - har byteposition av varje unikt ord i I.
+     * I - har byteposition av första instansen av ordet i L.
+     * L - har byteposition av varje förekomst av ord i korpus.
      * 
      * @param raw filen med innehållet som ska läsas.
      * @throws IOException om problem med filerna.
      */
     private static void createConstructionFiles(BufferedInputStream raw) throws IOException {
         String currentWord = "";
-        String previousWord = "a"; // TODO: TESTA ATT ÄNDRA SEN FRÅN "a".
+        String previousWord = "a"; // Vi vet att vi börjar på "a".
 
         String index;
         int indexLength = 0;
 
         int wordOccurs = 0;
 
-        // TODO: Våra pekare för att kunna hitta i de olika filerna.
+        // Våra pekare för att kunna hitta i de olika filerna.
         int iBytePositon = 0;
         int lBytePositon = 0;
         int previousLBytePosition = 0;
@@ -131,8 +141,7 @@ class Konkordans {
             // Vi försöker att läsa in fil L. (OUTPUT)
             try (BufferedOutputStream file_l = new BufferedOutputStream(new FileOutputStream(FILE_L))) {
 
-                // Mio.EOF returnerar true om filen är slutläst.
-                // while (!Mio.EOF(raw)) { TODO: KOLLA OM DENNA FUNGERAR ISTÄLLET.
+                // While-loopen slutas när vi inte hittar något nytt ord.
                 while (!(currentWord = Mio.GetWord(raw)).equals("")) {
 
                     // Mio.GetWord läser ett ord avgränsat av blanka från tangenterna och returnera
@@ -150,8 +159,10 @@ class Konkordans {
                                 .getBytes(ISO_LATIN_1));
 
                         // (A Hashning) - Vi använder oss av vår hash-funktion. Vi kollar ifall det
-                        // redan
-                        // finns ett ord med samma hash. Vi använder vår A-array som är på internminnet.
+                        // redan finns ett ord med samma hash. Vi använder vår A-array som är på
+                        // internminnet.
+                        // Om det inte finns så tilldelar vi bytepositionen av första instans av ordet
+                        // i L.
                         int hash = wPrefix(previousWord);
                         if (A[hash] == 0) {
                             A[hash] = iBytePositon;
@@ -190,8 +201,10 @@ class Konkordans {
                 }
             }
         }
+
         // Skriv till fil A. (SPARAR)
         writeToFileA();
+
     }
 
     /**
@@ -210,7 +223,8 @@ class Konkordans {
      */
     private static int wPrefix(String word) {
 
-        // Kollar om längden på ordet är mindre än tre.
+        // Kollar om längden på ordet är mindre än tre. (Fallen där vi har ord som är
+        // kortare än 3)
         if (word.length() < 3) {
 
             // Om ordet har en längd av ett.
@@ -222,7 +236,8 @@ class Konkordans {
                 word = " " + word;
             }
         }
-        // Motsvarar: h(w) = f(w[0])*900 + f(w[1])*30 + f(w[2])
+        // Motsvarar: h(w) = f(w[0])*900 + f(w[1])*30 + f(w[2]) - Denna gick vi igenom
+        // på föreläsning 3.
         return charMap[word.charAt(0)] * (BASE * BASE) + charMap[word.charAt(1)] * BASE + charMap[word.charAt(2)];
     }
 
@@ -247,79 +262,62 @@ class Konkordans {
     }
 
     /**
-     * Divide and Conquer
-     * "This is perhaps the bulkiest approach when compared to all the others
-     * described here; however, it's also the fastest because we're not performing
-     * any type of conversion, multiplication, addition, or object initialization.
-     * We can get our answer in just three or four simple if statements:"
+     * String-Based Solution
+     * Vi tar fram längden för en int (num).
      * - https://www.baeldung.com/java-number-of-digits-in-int
      * 
      * @param num det nummer vi ska ta fram längden till.
      * @return längden av num.
      */
     static int getLengthInt(int num) {
-        if (num < 100000) {
-            if (num < 100) {
-                if (num < 10) {
-                    return 1;
-                } else {
-                    return 2;
-                }
-            } else {
-                if (num < 1000) {
-                    return 3;
-                } else {
-                    if (num < 10000) {
-                        return 4;
-                    } else {
-                        return 5;
-                    }
-                }
-            }
-        } else {
-            if (num < 10000000) {
-                if (num < 1000000) {
-                    return 6;
-                } else {
-                    return 7;
-                }
-            } else {
-                if (num < 100000000) {
-                    return 8;
-                } else {
-                    if (num < 1000000000) {
-                        return 9;
-                    } else {
-                        return 10;
-                    }
-                }
-            }
-        }
+        return String.valueOf(num).length();
     }
 
-    // TODO: ÄNDRA NAMN OCH GE EN FÖRKLARING
-    /**
-     * Create a pre-calculated array for values to use with lazyHash method.
-     * The letters have values 1-29, with space having value 0.
-     * This also avoid repeated use of tolower() method on input.
+    /*
+     * Skapar en int-array som omvandlar bokstäverna i det svenska alfabetet till
+     * deras motsvarande ASCII-värde.
+     * CharMap arrayen används sedan i wPrefix.
      */
-    static void createCharValueArray() {
-        // Vi tilldelar ä, å, ä (stora och små) dess värde i charMap.
-        charMap[(short) 'Ä'] = charMap[(short) 'ä'] = 27;
-        charMap[(short) 'Å'] = charMap[(short) 'å'] = 28;
-        charMap[(short) 'Ö'] = charMap[(short) 'ö'] = 29;
-
-        // Vi går igenom de resterande bokstäverna (stora och små) och tilldelar dess värde i charMap.
-        for (short i = 1; i <= 26; i++) {
-            charMap['A' + i - 1] = charMap['a' + i - 1] = i;
-        }
+    private static void createCharMap() {
+        // Vi tilldelar alla bokstäver (stora och små) dess värde i int-arrayen charMap.
+        charMap[(int) ' '] = 0;
+        charMap[(int) 'A'] = charMap[(int) 'a'] = 1;
+        charMap[(int) 'B'] = charMap[(int) 'b'] = 2;
+        charMap[(int) 'C'] = charMap[(int) 'c'] = 3;
+        charMap[(int) 'D'] = charMap[(int) 'd'] = 4;
+        charMap[(int) 'E'] = charMap[(int) 'e'] = 5;
+        charMap[(int) 'F'] = charMap[(int) 'f'] = 6;
+        charMap[(int) 'G'] = charMap[(int) 'g'] = 7;
+        charMap[(int) 'H'] = charMap[(int) 'h'] = 8;
+        charMap[(int) 'I'] = charMap[(int) 'i'] = 9;
+        charMap[(int) 'J'] = charMap[(int) 'j'] = 10;
+        charMap[(int) 'K'] = charMap[(int) 'k'] = 11;
+        charMap[(int) 'L'] = charMap[(int) 'l'] = 12;
+        charMap[(int) 'M'] = charMap[(int) 'm'] = 13;
+        charMap[(int) 'N'] = charMap[(int) 'n'] = 14;
+        charMap[(int) 'O'] = charMap[(int) 'o'] = 15;
+        charMap[(int) 'P'] = charMap[(int) 'p'] = 16;
+        charMap[(int) 'Q'] = charMap[(int) 'q'] = 17;
+        charMap[(int) 'R'] = charMap[(int) 'r'] = 18;
+        charMap[(int) 'S'] = charMap[(int) 's'] = 19;
+        charMap[(int) 'T'] = charMap[(int) 't'] = 20;
+        charMap[(int) 'U'] = charMap[(int) 'u'] = 21;
+        charMap[(int) 'V'] = charMap[(int) 'v'] = 22;
+        charMap[(int) 'W'] = charMap[(int) 'w'] = 23;
+        charMap[(int) 'X'] = charMap[(int) 'x'] = 24;
+        charMap[(int) 'Y'] = charMap[(int) 'y'] = 25;
+        charMap[(int) 'Z'] = charMap[(int) 'z'] = 26;
+        charMap[(int) 'Ä'] = charMap[(int) 'ä'] = 27;
+        charMap[(int) 'Å'] = charMap[(int) 'å'] = 28;
+        charMap[(int) 'Ö'] = charMap[(int) 'ö'] = 29;
     }
 
     // ###########################################################################################################
     // SÖKPROGRAMMET
     // ###########################################################################################################
     /**
-     * Läser av innehållet i filen: A.txt
+     * Läser av innehållet i filen: A.txt och tillsätter värdena i den lokala
+     * arrayen A.
      * 
      * @throws IOException om filen laddas fel.
      */
@@ -328,7 +326,8 @@ class Konkordans {
         // Vi försöker att läsa in fil A. (INPUT)
         try (BufferedInputStream file_a = new BufferedInputStream(new FileInputStream(FILE_A))) {
 
-            // Vi vet redan hur många läsningar vi kommer att behöva göra.
+            // Vi vet redan hur många läsningar vi kommer att behöva göra och därför kan vi
+            // ta längden av A. (BASE * BASE * BASE)
             for (int i = 0; i < A.length; i++) {
                 A[i] = Mio.GetInt(file_a);
             }
@@ -336,32 +335,121 @@ class Konkordans {
     }
 
     private static Boolean searchWord(String wordToFind) throws IOException {
+        // Vi börjar med att spara det hashade värdet från wPrefix.
         int hash = wPrefix(wordToFind);
 
-        // 3-bytes
+        // Vi använder sedan det hashade värdet och tar fram vår första pekare.
         int firstBytes = A[hash];
         int nextBytes;
 
+        // Kollar om det hashade värdet motsvarar hashade ööö (slut). Det sista hashade
+        // ordet.
+        // 26999 = (hash-ööö)
         if (hash == 26999) {
             nextBytes = firstBytes;
         } else {
-            for (int i = 1; (nextBytes = A[hash + i]) == 0; i++)
-                ;
+            // Vi håller på tills vi hittar en position i A som inte är tom. Vi behöver det
+            // här i binärsökningen.
+            int i = 1;
+            while (true) {
+                if ((A[hash + i]) != 0) {
+                    nextBytes = (A[hash + i]);
+                    break;
+                }
+                i++;
+            }
+            System.out.println(nextBytes);
         }
 
         // Vi söker i I-filen
-        int[] iByteArray = binarySearch(wordToFind, firstBytes, nextBytes);
-        int firstBytesPosition = iByteArray[0];
+        // [byteposition av första instans i L (0), byteposition av sista instans i L
+        // (1), antal förekomster av samma ordet (2)]
+        int[] lByteArray = binarySearch(wordToFind, firstBytes, nextBytes);
+
+        // Vi tar första instan i L.
+        int firstLBytes = lByteArray[0];
 
         // Vi kollar om värdet av firstBytesPosition är lika med -1.
         // Ifall det stämmer hittades inget ord i binärsökningen.
-        if (firstBytesPosition == -1) {
+        if (firstLBytes == -1) {
             return false;
         }
 
-        int numberOfWordOccurrences = iByteArray[2];
-        System.out.printf("Det finns %d förekomster av ordet.\n", numberOfWordOccurrences);
-        return true;
+        // Vi tar sista instan i L.
+        int lastLBytes = lByteArray[1];
+
+        // Vi tar antalet förekomster av samma ord i L.
+        int numOfOccur = lByteArray[2];
+
+        System.out.printf("Det finns %d förekomster av ordet.\n", numOfOccur);
+
+        // Vi söker nu i L-filen.
+        RandomAccessFile L = new RandomAccessFile(FILE_L, "r");
+        RandomAccessFile KORPUS = new RandomAccessFile(FILE_KORPUS, "r");
+        L.seek(firstLBytes);
+        BufferedReader bufferedReader = new BufferedReader(
+                new InputStreamReader(new FileInputStream(L.getFD()), ISO_LATIN_1));
+
+        // Om det är de sista ordet
+        // Vi kollar först om inte lastLBytes är -1 (finns ej)
+        if (lastLBytes == -1) {
+            String line;
+
+            while ((line = bufferedReader.readLine()) != null) {
+
+                int bytePosition = Integer.parseInt(line);
+                printFinalResult(KORPUS, bytePosition, wordToFind.length());
+            }
+        } else {
+            int linesPrinted = 0;
+            while (firstLBytes < lastLBytes && linesPrinted < MAXLINES) {
+                String korpusByteLine = bufferedReader.readLine();
+
+                int bytePosition = Integer.parseInt(korpusByteLine);
+                printFinalResult(KORPUS, bytePosition, wordToFind.length());
+
+                firstLBytes += korpusByteLine.length() + 1;
+                linesPrinted++;
+                if (linesPrinted == MAXLINES - 1) {
+                    System.out.println("Fler träffar (y/n): ");
+                    if (Mio.GetWord().equalsIgnoreCase("y")) {
+                        linesPrinted = 0;
+                    } else {
+                        return true;
+                    }
+                }
+            }
+
+        }
+        return false;
+    }
+
+    /*
+     * Skriver ut "lines" från en fil med en angiven byteposition och en längd.
+     */
+    static void printFinalResult(RandomAccessFile FILE, int bytePosition, int wordLength) throws IOException {
+        // 30 tecken före och 30 tecken efter.
+        byte[] byteBuffer = new byte[60 + wordLength];
+
+        // Kollar om bytepositionen - 30 är mindre än noll. (Inte finns 30 tecken
+        // framför)
+        if ((bytePosition -= 30) < 0)
+            bytePosition = 0;
+
+        FILE.seek(bytePosition);
+        FILE.read(byteBuffer);
+
+        // Vi ersätter sedan newline med blanksteg.
+        for (int i = 0; i < byteBuffer.length; i++) {
+            // 0xA == ISO_LATIN_1 (newline)
+            // 0x20 == ISO_LATIN_1 (space)
+            if (byteBuffer[i] == 0xA) {
+                byteBuffer[i] = 0x20;
+            }
+        }
+
+        // Slutligen skriver vi ut vad vi hadde.
+        System.out.println(new String(byteBuffer, ISO_LATIN_1));
     }
 
     /**
@@ -369,44 +457,43 @@ class Konkordans {
      * Binary search of word in I-file. Switches to linear search at lower distance
      *
      * @param searchWord to search in file
-     * @param i          lower byte position of the first three letter words
-     * @param j          upper byte position of the first three letter words
+     * @param firstBytes lower byte position of the first three letter words
+     * @param nextBytes  upper byte position of the first three letter words
      * @return [byte position in P of search word, Byte position of next word,
      *         Occurrences]. -1 if word not found
      * @throws IOException from file handling
      */
-    static int[] binarySearch(String searchWord, int i, int j) throws IOException {
+    static int[] binarySearch(String searchWord, int firstBytes, int nextBytes) throws IOException {
         RandomAccessFile I = new RandomAccessFile(FILE_I, "r");
-        BufferedReader bufI = new BufferedReader(
-                new InputStreamReader(new FileInputStream(I.getFD()), ISO_LATIN_1));
+        BufferedReader bufI = new BufferedReader(new InputStreamReader(new FileInputStream(I.getFD()), ISO_LATIN_1));
         // pre-compile and reuse regex for performance
         Pattern p = Pattern.compile(" ");
         int[] retArray = new int[] { -1, -1, 0 };
 
         // Divide and conquer search
-        while (j - i > 1000) {
-            int mid = i + (j - i) / 2;
+        while (nextBytes - firstBytes > 1000) {
+            int mid = firstBytes + (nextBytes - firstBytes) / 2;
             I.seek(mid);
             mid += I.readLine().length() + 1; // To adjust if seek to middle of line
             String midWord = p.split(I.readLine())[0];
             if (midWord.compareTo(searchWord) < 0) {
-                i = mid;
+                firstBytes = mid;
             } else {
-                j = mid;
+                nextBytes = mid;
             }
         }
-        I.seek(i);
+        I.seek(firstBytes);
 
         // Linear search
-        while (i <= j) {
+        while (firstBytes <= nextBytes) {
             String line = bufI.readLine();
             String[] lineInfo = p.split(line);
             String linearWord = lineInfo[0];
             if (linearWord.equals(searchWord)) {
-                // Starting byte position of word in P
+                // Starting byteposition of word in P
                 retArray[0] = Integer.parseInt(lineInfo[1]);
 
-                // Starting byte position of next word in P
+                // Starting byteposition of next word in P
                 String lineCheck = bufI.readLine();
                 if (lineCheck != null) { // last line check
                     retArray[1] = Integer.parseInt(p.split(lineCheck)[1]);
@@ -417,7 +504,7 @@ class Konkordans {
 
                 return retArray;
             }
-            i += line.length() + 1;
+            firstBytes += line.length() + 1;
         }
         return retArray;
     }
