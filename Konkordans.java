@@ -480,9 +480,9 @@ class Konkordans {
 
         // Divide and conquer search
         while (nextBytes - firstBytes > 1000) {
-            int mid = firstBytes + (nextBytes - firstBytes) / 2;
+            int mid = firstBytes + ((nextBytes - firstBytes) / 2);
             I.seek(mid);
-            mid += I.readLine().length(); // To adjust if seek to middle of line
+            mid += I.readLine().length() + 1; // To adjust if seek to middle of line
             String midWord = p.split(I.readLine())[0];
             if (midWord.compareTo(searchWord) < 0) {
                 firstBytes = mid;
@@ -536,9 +536,14 @@ class Konkordans {
         // Vi skapar en array som vi uppdaterar.
         int[] returnArray = new int[] { -1, -1, 0 };
 
+        //ord1
+        //...
+        //...
+        //ordn
+
         // Divide and conquer search
         while (next - first > 1000) {
-            int mid = first + (next - first) / 2;
+            int mid = first + ((next - first) / 2);
             I.seek(mid);
 
             // Vi ser till så att vi hamnar i mitten.
