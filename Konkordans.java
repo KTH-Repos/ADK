@@ -19,10 +19,10 @@ class Konkordans {
 
     // Filer (KTH)
      private static final File FILE_RAWINDEX = new File("/afs/kth.se/misc/info/kurser/DD2350/adk22/labb1/rawindex.txt");
-     private static final File FILE_KORPUS = new File("/var/tmp/II.txt");
-     private static final File FILE_A = new File("/var/tmp/AA.txt");
-     private static final File FILE_I = new File("/var/tmp/PP.txt");
-     private static final File FILE_L = new File("/afs/kth.se/misc/info/kurser/DD2350/adk22/labb1/korpusKORPUS");
+     private static final File FILE_KORPUS = new File("/var/tmp/III.txt");
+     private static final File FILE_A = new File("/var/tmp/AAA.txt");
+     private static final File FILE_I = new File("/var/tmp/PPP.txt");
+     private static final File FILE_L = new File("/afs/kth.se/misc/info/kurser/DD2350/adk22/labb1/korpus");
 
     // Basen som vi kommmer att använda till vår hash-funktion. A till ö motsvarar
     // 29 tecken och mellanslag som 1 (totalt 30).
