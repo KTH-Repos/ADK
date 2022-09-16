@@ -1,8 +1,6 @@
 import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.security.DrbgParameters.NextBytes;
-import java.util.Random;
 import java.util.regex.Pattern;
 
 /*
@@ -13,11 +11,18 @@ import java.util.regex.Pattern;
 class Konkordans {
 
     // Filer (lokalt)
-    private static final File FILE_RAWINDEX = new File("rawindex.txt");
-    private static final File FILE_KORPUS = new File("korpus");
-    private static final File FILE_A = new File("A.txt");
-    private static final File FILE_I = new File("I.txt");
-    private static final File FILE_L = new File("L.txt");
+    // private static final File FILE_RAWINDEX = new File("rawindex.txt");
+    // private static final File FILE_KORPUS = new File("korpus");
+    // private static final File FILE_A = new File("A.txt");
+    // private static final File FILE_I = new File("I.txt");
+    // private static final File FILE_L = new File("L.txt");
+
+    // Filer (KTH)
+    private static final File FILE_RAWINDEX = new File("/afs/kth.se/misc/info/kurser/DD2350/adk21/labb1/rawindex.txt");
+    private static final File FILE_KORPUS = new File("/var/tmp/I.txt");
+    private static final File FILE_A = new File("/var/tmp/A.txt");
+    private static final File FILE_I = new File("/var/tmp/P.txt");
+    private static final File FILE_L = new File("/afs/kth.se/misc/info/kurser/DD2350/adk21/labb1/korpus");
 
     // Basen som vi kommmer att använda till vår hash-funktion. A till ö motsvarar
     // 29 tecken och mellanslag som 1 (totalt 30).
@@ -86,9 +91,14 @@ class Konkordans {
         }
 
         // Vi söker efter ordet och kollar ifall det finns.
-        if (searchWord(wordToFind.toLowerCase())) {
-            System.out.println("Ordet '" + wordToFind + "' hittades inte.");
+        if (!searchWord(wordToFind.toLowerCase())) {
+            System.out.println("Hittade inte fler / inga: '" + wordToFind + "'.");
         }
+
+        // boolean foundWord = searchWord(wordToFind.toLowerCase());
+        // if (foundWord == true) {
+        // System.out.println("Ordet '" + wordToFind + "' hittades inte.");
+        // }
 
         long endTime = System.nanoTime();
         long totalTime = endTime - startTime;
@@ -114,9 +124,9 @@ class Konkordans {
     // ###########################################################################################################
     /**
      * Skapar A, I, L filarna.
-     * A - har byteposition av varje unikt ord i I.
-     * I - har byteposition av första instansen av ordet i L.
-     * L - har byteposition av varje förekomst av ord i korpus.
+     * A - har position av varje unikt ord i I.
+     * I - har position av första instansen av ordet i L.
+     * L - har position av varje förekomst av ord i korpus.
      * 
      * @param raw filen med innehållet som ska läsas.
      * @throws IOException om problem med filerna.
@@ -131,9 +141,9 @@ class Konkordans {
         int wordOccurs = 0;
 
         // Våra pekare för att kunna hitta i de olika filerna.
-        int iBytePositon = 0;
-        int lBytePositon = 0;
-        int previousLBytePosition = 0;
+        int iPositon = 0;
+        int lPositon = 0;
+        int previousLPosition = 0;
 
         // Vi försöker att läsa in fil I. (OUTPUT)
         try (BufferedOutputStream file_i = new BufferedOutputStream(new FileOutputStream(FILE_I))) {
@@ -141,7 +151,8 @@ class Konkordans {
             // Vi försöker att läsa in fil L. (OUTPUT)
             try (BufferedOutputStream file_l = new BufferedOutputStream(new FileOutputStream(FILE_L))) {
 
-                // While-loopen slutas när vi inte hittar något nytt ord.
+                // While-loopen slutas när vi inte hittar något nytt ord från
+                // "raw"-bufferedinputstream.
                 while (!(currentWord = Mio.GetWord(raw)).equals("")) {
 
                     // Mio.GetWord läser ett ord avgränsat av blanka från tangenterna och returnera
@@ -155,31 +166,31 @@ class Konkordans {
                     if (!currentWord.equals(previousWord)) {
 
                         // (FIL I) - Vi skriver och sparar data i fil I. Vi tänker på teckenkodning.
-                        file_i.write((previousWord + " " + previousLBytePosition + " " + wordOccurs + "\n")
+                        file_i.write((previousWord + " " + previousLPosition + " " + wordOccurs + "\n")
                                 .getBytes(ISO_LATIN_1));
 
                         // (A Hashning) - Vi använder oss av vår hash-funktion. Vi kollar ifall det
                         // redan finns ett ord med samma hash. Vi använder vår A-array som är på
                         // internminnet.
-                        // Om det inte finns så tilldelar vi bytepositionen av första instans av ordet
+                        // Om det inte finns så tilldelar vi positionen av första instans av ordet
                         // i L.
                         int hash = wPrefix(previousWord);
                         if (A[hash] == 0) {
-                            A[hash] = iBytePositon;
+                            A[hash] = iPositon;
                         }
 
-                        // TODO: Osäker vad den här gör helt. Vi kollar om vi kan ändra på den här sen.
-                        // Jag tolkar det som att vi lägger ihop dessa så att de får en specifik
-                        // placering och blir en pekare sen.
-                        iBytePositon += previousWord.length() + getLengthInt(previousLBytePosition)
+                        // Vi får fram adressen som läggs i A genom att vi lägger ihop längden av
+                        // previousWord, previousLPosition och wordOccurs. Vi lägger även till 3 då
+                        // vår indexering är 3. Värt att notera är att vi har int och inte bytes.
+                        iPositon += previousWord.length() + getLengthInt(previousLPosition)
                                 + getLengthInt(wordOccurs) + 3;
 
                         previousWord = currentWord;
-                        previousLBytePosition = lBytePositon;
+                        previousLPosition = lPositon;
                         wordOccurs = 0;
                     }
-                    // Vi ökar lBytePositon med index-längden plus ett.
-                    lBytePositon += indexLength + 1;
+                    // Vi ökar lPositon med index-längden plus ett.
+                    lPositon += indexLength + 1;
 
                     // Vi ökar wordOccurs med ett ifall ordet förekommer igen.
                     wordOccurs++;
@@ -191,20 +202,18 @@ class Konkordans {
 
                 // Extra för att spara det sista ordet.
                 // (FIL I)
-                file_i.write((previousWord + " " + previousLBytePosition + " " + wordOccurs + "\n")
+                file_i.write((previousWord + " " + previousLPosition + " " + wordOccurs + "\n")
                         .getBytes(ISO_LATIN_1));
 
                 // (A Hashning)
                 int hash = wPrefix(previousWord);
                 if (A[hash] == 0) {
-                    A[hash] = iBytePositon;
+                    A[hash] = iPositon;
                 }
             }
         }
-
         // Skriv till fil A. (SPARAR)
         writeToFileA();
-
     }
 
     /**
@@ -251,12 +260,12 @@ class Konkordans {
         // Vi försöker att läsa in fil A. (OUTPUT)
         try (BufferedOutputStream file_a = new BufferedOutputStream(new FileOutputStream(FILE_A))) {
 
-            // (for-each loop) För varje iBytePosition i arrayen:
-            for (int iBytePosition : A) {
+            // (for-each loop) För varje iPosition i arrayen:
+            for (int iPosition : A) {
 
-                // Vi skriver till fil A iBytePositionen och gör ett mellanslag mellan varje
+                // Vi skriver till fil A iPositionen och gör ett mellanslag mellan varje
                 // steg.
-                file_a.write((iBytePosition + " ").getBytes(ISO_LATIN_1));
+                file_a.write((iPosition + " ").getBytes(ISO_LATIN_1));
             }
         }
     }
@@ -339,79 +348,78 @@ class Konkordans {
         int hash = wPrefix(wordToFind);
 
         // Vi använder sedan det hashade värdet och tar fram vår första pekare.
-        int firstBytes = A[hash];
-        int nextBytes;
+        int first = A[hash];
+        int next;
 
         // Kollar om det hashade värdet motsvarar hashade ööö (slut). Det sista hashade
         // ordet.
         // 26999 = (hash-ööö)
         if (hash == 26999) {
-            nextBytes = firstBytes;
+            next = first;
         } else {
             // Vi håller på tills vi hittar en position i A som inte är tom. Vi behöver det
             // här i binärsökningen.
             int i = 1;
             while (true) {
                 if ((A[hash + i]) != 0) {
-                    nextBytes = (A[hash + i]);
+                    next = (A[hash + i]);
                     break;
                 }
                 i++;
             }
-            System.out.println(nextBytes);
         }
 
         // Vi söker i I-filen
-        // [byteposition av första instans i L (0), byteposition av sista instans i L
+        // [position av första instans i L (0), position av sista instans i L
         // (1), antal förekomster av samma ordet (2)]
-        int[] lByteArray = binarySearch(wordToFind, firstBytes, nextBytes);
+        int[] lArray = binarySearch(wordToFind, first, next);
 
         // Vi tar första instan i L.
-        int firstLBytes = lByteArray[0];
+        int firstL = lArray[0];
 
-        // Vi kollar om värdet av firstBytesPosition är lika med -1.
+        // Vi kollar om värdet av firstPosition är lika med -1.
         // Ifall det stämmer hittades inget ord i binärsökningen.
-        if (firstLBytes == -1) {
+        if (firstL == -1) {
             return false;
         }
 
         // Vi tar sista instan i L.
-        int lastLBytes = lByteArray[1];
+        int lastL = lArray[1];
 
         // Vi tar antalet förekomster av samma ord i L.
-        int numOfOccur = lByteArray[2];
+        int numOfOccur = lArray[2];
 
         System.out.printf("Det finns %d förekomster av ordet.\n", numOfOccur);
 
         // Vi söker nu i L-filen.
         RandomAccessFile L = new RandomAccessFile(FILE_L, "r");
         RandomAccessFile KORPUS = new RandomAccessFile(FILE_KORPUS, "r");
-        L.seek(firstLBytes);
+        L.seek(firstL);
         BufferedReader bufferedReader = new BufferedReader(
                 new InputStreamReader(new FileInputStream(L.getFD()), ISO_LATIN_1));
 
         // Om det är de sista ordet
-        // Vi kollar först om inte lastLBytes är -1 (finns ej)
-        if (lastLBytes == -1) {
+        // Vi kollar först om inte lastL är -1 (finns ej från binärsökningen)
+        if (lastL == -1) {
             String line;
 
             while ((line = bufferedReader.readLine()) != null) {
 
-                int bytePosition = Integer.parseInt(line);
-                printFinalResult(KORPUS, bytePosition, wordToFind.length());
+                int position = Integer.parseInt(line);
+                printFinalResult(KORPUS, position, wordToFind.length());
             }
         } else {
             int linesPrinted = 0;
-            while (firstLBytes < lastLBytes && linesPrinted < MAXLINES) {
-                String korpusByteLine = bufferedReader.readLine();
+            while (firstL < lastL && linesPrinted < MAXLINES) {
+                String korpusLine = bufferedReader.readLine();
 
-                int bytePosition = Integer.parseInt(korpusByteLine);
-                printFinalResult(KORPUS, bytePosition, wordToFind.length());
+                int position = Integer.parseInt(korpusLine);
+                printFinalResult(KORPUS, position, wordToFind.length());
 
-                firstLBytes += korpusByteLine.length() + 1;
+                firstL += korpusLine.length() + 1;
                 linesPrinted++;
                 if (linesPrinted == MAXLINES - 1) {
-                    System.out.println("Fler träffar (y/n): ");
+                    System.out.println("Fler träffar (y/n)?: ");
                     if (Mio.GetWord().equalsIgnoreCase("y")) {
                         linesPrinted = 0;
                     } else {
@@ -425,31 +433,31 @@ class Konkordans {
     }
 
     /*
-     * Skriver ut "lines" från en fil med en angiven byteposition och en längd.
+     * Skriver ut "lines" från en fil med en angiven position och en längd.
      */
-    static void printFinalResult(RandomAccessFile FILE, int bytePosition, int wordLength) throws IOException {
+    static void printFinalResult(RandomAccessFile FILE, int position, int wordLength) throws IOException {
         // 30 tecken före och 30 tecken efter.
-        byte[] byteBuffer = new byte[60 + wordLength];
+        byte[] buffer = new byte[60 + wordLength];
 
-        // Kollar om bytepositionen - 30 är mindre än noll. (Inte finns 30 tecken
+        // Kollar om positionen - 30 är mindre än noll. (Inte finns 30 tecken
         // framför)
-        if ((bytePosition -= 30) < 0)
-            bytePosition = 0;
+        if ((position -= 30) < 0)
+            position = 0;
 
-        FILE.seek(bytePosition);
-        FILE.read(byteBuffer);
+        FILE.seek(position);
+        FILE.read(buffer);
 
         // Vi ersätter sedan newline med blanksteg.
-        for (int i = 0; i < byteBuffer.length; i++) {
+        for (int i = 0; i < buffer.length; i++) {
             // 0xA == ISO_LATIN_1 (newline)
             // 0x20 == ISO_LATIN_1 (space)
-            if (byteBuffer[i] == 0xA) {
-                byteBuffer[i] = 0x20;
+            if (buffer[i] == 0xA) {
+                buffer[i] = 0x20;
             }
         }
 
         // Slutligen skriver vi ut vad vi hadde.
-        System.out.println(new String(byteBuffer, ISO_LATIN_1));
+        System.out.println(new String(buffer, ISO_LATIN_1));
     }
 
     /**
@@ -490,10 +498,10 @@ class Konkordans {
             String[] lineInfo = p.split(line);
             String linearWord = lineInfo[0];
             if (linearWord.equals(searchWord)) {
-                // Starting byteposition of word in P
+                // Starting position of word in P
                 retArray[0] = Integer.parseInt(lineInfo[1]);
 
-                // Starting byteposition of next word in P
+                // Starting position of next word in P
                 String lineCheck = bufI.readLine();
                 if (lineCheck != null) { // last line check
                     retArray[1] = Integer.parseInt(p.split(lineCheck)[1]);
@@ -507,5 +515,65 @@ class Konkordans {
             firstBytes += line.length() + 1;
         }
         return retArray;
+    }
+
+    /*
+     * Binary Search
+     * https://www.geeksforgeeks.org/binary-search/
+     */
+    static int[] binarySearch2(String searchWord, int first, int next) throws IOException {
+
+        RandomAccessFile I = new RandomAccessFile(FILE_I, "r");
+
+        // Vi skapar en bufferedReader för att kunna läsa "lines".
+        BufferedReader bufferedReader = new BufferedReader(
+                new InputStreamReader(new FileInputStream(I.getFD()), ISO_LATIN_1));
+
+        // Vi skapar en pattern för att kunna använda .split (gör det enkelt och
+        // snabbt). Vi vill splita efter varje " " mellanslag.
+        // Pattern pattern = Pattern.compile(" ");
+
+        // Vi skapar en array som vi uppdaterar.
+        int[] returnArray = new int[] { -1, -1, 0 };
+
+        // Divide and conquer search
+        while (next - first > 1000) {
+            int mid = first + (next - first) / 2;
+            I.seek(mid);
+
+            // Vi ser till så att vi hamnar i mitten.
+            mid += I.readLine().length() + 1;
+            String midWord = bufferedReader.readLine().split(" ")[0];
+            if (midWord.compareTo(searchWord) < 0) {
+                first = mid;
+            } else {
+                next = mid;
+            }
+        }
+        I.seek(first);
+
+        // Linear search
+        while (first <= next) {
+            String line = bufferedReader.readLine();
+            String[] lineInfo = bufferedReader.readLine().split(" ");
+            String linearWord = lineInfo[0];
+            if (linearWord.equals(searchWord)) {
+                // Starting position of word in P
+                returnArray[0] = Integer.parseInt(lineInfo[1]);
+
+                // Starting position of next word in P
+                String lineCheck = bufferedReader.readLine();
+                if (lineCheck != null) { // last line check
+                    returnArray[1] = Integer.parseInt(bufferedReader.readLine().split(" ")[1]);
+                }
+
+                // Number of word occurences
+                returnArray[2] = Integer.parseInt(lineInfo[2]);
+
+                return returnArray;
+            }
+            first += line.length() + 1;
+        }
+        return returnArray;
     }
 }
