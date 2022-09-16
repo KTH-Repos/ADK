@@ -346,10 +346,15 @@ class Konkordans {
     private static Boolean searchWord(String wordToFind) throws IOException {
         // Vi börjar med att spara det hashade värdet från wPrefix.
         int hash = wPrefix(wordToFind);
+        System.out.println("wordToFind: " + wordToFind);
+        System.out.println("Hash: " + hash);
 
         // Vi använder sedan det hashade värdet och tar fram vår första pekare.
         int first = A[hash];
         int next;
+
+        System.out.println("First: "  + first);
+        System.out.println("Next: " + next);
 
         // Kollar om det hashade värdet motsvarar hashade ööö (slut). Det sista hashade
         // ordet.
@@ -537,10 +542,10 @@ class Konkordans {
         // Vi skapar en array som vi uppdaterar.
         int[] returnArray = new int[] { -1, -1, 0 };
 
-        //ord1
-        //...
-        //...
-        //ordn
+        // ord1
+        // ...
+        // ...
+        // ordn
 
         // Divide and conquer search
         while (next - first > 1000) {
