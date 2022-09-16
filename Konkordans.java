@@ -22,7 +22,7 @@ class Konkordans {
      private static final File FILE_KORPUS = new File("/var/tmp/IIII.txt");
      private static final File FILE_A = new File("/var/tmp/AAAA.txt");
      private static final File FILE_I = new File("/var/tmp/PPPP.txt");
-     private static final File FILE_L = new File("korpus");
+     private static final File FILE_L = new File("/afs/kth.se/misc/info/kurser/DD2350/adk22/labb1/korpus");
 
     // Basen som vi kommmer att använda till vår hash-funktion. A till ö motsvarar
     // 29 tecken och mellanslag som 1 (totalt 30).
