@@ -439,10 +439,10 @@ class Konkordans {
                 // Vi ökar antalet utskrivna rader tills det blir 25
                 linesPrinted++;
 
-                // Vi kollar ifall vi ska skriva ut fler sökträffar.
+                // Vi kollar ifall vi ska fråga användaren om fler sökträffar.
                 if (linesPrinted == (MAXLINES - 1)) {
 
-                    // Vi frågar användaren
+                    // Vi frågar användaren om de vill se fler sökträffar.
                     System.out.println("Vil du se fler sökträffar (ja/nej)?: ");
                     Scanner sc = new Scanner(System.in);
                     String svar = sc.nextLine();
@@ -455,6 +455,7 @@ class Konkordans {
                 }
             }
         }
+
         // Om sökordet inte finns returneras false.
         return false;
     }
@@ -552,30 +553,77 @@ class Konkordans {
 
             // Vi kollar om checkWord är samma som searchWord
             if (checkWord.equals(searchWord)) {
-                // Starting position of word in P
+
+                // Vi sparar "start postion" av ordet i L.
                 returnArray[0] = Integer.parseInt(checkLine[1]);
 
-                // Starting position of next word in P
-                // String lineCheck = bufferedReader.readLine();
+                // Vi tar "start position" av nästa ord i L.
+                String lineCheck = bufferedReader.readLine();
 
-                // Fall ifall vi är på den sista "line".
-                if (line != null) {
-                    returnArray[1] = Integer.parseInt(line.split(" ")[1]);
+                // Fall ifall vi är på den sista "line". (bufferedReader.readLine() ger null om
+                // slut)
+                if (lineCheck != null) {
+
+                    // Ifall det är slutet så sparar vi positionen vi fick innan.
+                    returnArray[1] = Integer.parseInt(lineCheck.split(" ")[1]);
                 }
 
-                // Number of word occurences
+                // Vi sparar hur många gånger ordet förekommer.
                 returnArray[2] = Integer.parseInt(checkLine[2]);
 
+                // Vi returnerar arrayen med informationen.
                 return returnArray;
             }
 
             // Går till nästa "line"
             first += line.length() + 1;
         }
+
+        // Vi returnerar arrayen med informationen.
         return returnArray;
     }
-}
 
-// This code is a part of a search algorithm. It searches for a word in the text
-// and returns the position of the first occurence, the position of the next
-// word and how many times it occurs.
+    // ###########################################################################################################
+    // Reflektion
+    // ###########################################################################################################
+
+    /*-----------------------------------------------------------------------------
+     * Reflektera över er erfarenhetfrån parprogrammeringen vid denna labb (krävs
+     * endast för labbleveranspoäng)
+     * 
+     * Vi tyckte att det fungerade bra. Det är inte vår första gång då vi jobbat i
+     * par. Parprogrammeringen hjälpte oss att få en tydlig bild av vad vi ska göra
+     * och hur vi ska göra. Man kan alltid bolla med ideer fram och tillbaka och det
+     * finns mindre risk att man fastnar. 
+     *
+     * -----------------------------------------------------------------------------
+     * Vid redovisningen ska ni kunna motivera varför internminneskomplexiteten är konstant.
+     * 
+     * text...
+     * 
+     * -----------------------------------------------------------------------------
+     * Visa en uppsättning testfall som ni har tagit fram för att kolla att
+     * programmet gör rätt. Ni ska också kunna motivera varför ni valt just dessa
+     * testfall.
+     * 
+     * algoritmens (Vi kan jämföra svaret som fanns i labblydelsen.)
+     * AlgoRiTmEns (Vi kan kolla ifall vi får samma svar med stora och små bokstäver.)
+     * 
+     * -----------------------------------------------------------------------------
+     * Visa att programmet fungerar och är tillräckligt snabbt för era testfall och labbhandledarens testfall.
+     * 
+     * text...
+     * 
+     * 
+     * -----------------------------------------------------------------------------
+     * Visa och förklara hur lösningens datastrukturer på fil och i minnet fungerar.
+     * 
+     * text...
+     * 
+     * -----------------------------------------------------------------------------
+     * Visa programkoden och vara beredd att svara på frågor om den.
+     * 
+     * (Visa programkod)
+     * 
+     */
+}
