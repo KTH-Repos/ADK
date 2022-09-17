@@ -322,7 +322,7 @@ class Konkordans {
     // ###########################################################################################################
     /**
      * Läser av innehållet i filen: A.txt och tillsätter värdena i den lokala
-     * arrayen A.
+     * arrayen A. (för att ligga på internminnet)
      * 
      * @throws IOException om filen laddas fel.
      */
@@ -596,7 +596,10 @@ class Konkordans {
      * -----------------------------------------------------------------------------
      * Vid redovisningen ska ni kunna motivera varför internminneskomplexiteten är konstant.
      * 
-     * text...
+     * Internminneskomplexiteten är konstant för att seek() får in en bytePosition för att direkt 
+     * kunna hoppa till rätt position i filerna. 
+     * 
+     * Filerna vi läser (utom A) ligger på vanligt minne. Vi behöver inte all information samtidgt vilket gör att vi inte behöver ha allt sparat på internminnet. Vi behöver bara hoppa till de delarna vi behöver i Korpus med seek().
      * 
      * -----------------------------------------------------------------------------
      * Visa en uppsättning testfall som ni har tagit fram för att kolla att
@@ -614,18 +617,17 @@ class Konkordans {
      * -----------------------------------------------------------------------------
      * Visa att programmet fungerar och är tillräckligt snabbt för era testfall och labbhandledarens testfall.
      * 
-     * text...
-     * 
+     * (Visa konsolen när vi kör och testa de nya testfallen.)
      * 
      * -----------------------------------------------------------------------------
      * Visa och förklara hur lösningens datastrukturer på fil och i minnet fungerar.
      * 
-     * text...
+     * (Visa skiss) A ligger i internminnet och de resternade i vanligt minne. Skissen visar hur de olika filerna kopplar med varandra.
      * 
      * -----------------------------------------------------------------------------
      * Visa programkoden och vara beredd att svara på frågor om den.
      * 
-     * (Visa programkod)
+     * (Visa programkod och svara på frågorna.)
      * 
      */
 }
