@@ -556,11 +556,11 @@ class Konkordans {
                 returnArray[0] = Integer.parseInt(checkLine[1]);
 
                 // Starting position of next word in P
-                String lineCheck = bufferedReader.readLine();
+                // String lineCheck = bufferedReader.readLine();
 
                 // Fall ifall vi är på den sista "line".
-                if (lineCheck != null) {
-                    returnArray[1] = Integer.parseInt(lineCheck.split(" ")[1]);
+                if (line != null) {
+                    returnArray[1] = Integer.parseInt(line.split(" ")[1]);
                 }
 
                 // Number of word occurences
