@@ -445,7 +445,7 @@ class Konkordans {
                     // Vi frågar användaren om de vill se fler sökträffar.
                     System.out.println("Vil du se fler sökträffar (ja/nej)?: ");
                     if (Mio.GetWord().equalsIgnoreCase("ja")) {
-                        printedLines = 0;
+                        linesPrinted = 0;
                     } else {
                         return true;
                     }
