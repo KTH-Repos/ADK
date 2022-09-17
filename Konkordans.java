@@ -18,11 +18,11 @@ class Konkordans {
     // private static final File FILE_L = new File("L.txt");
 
     // Filer (KTH)
-     private static final File FILE_RAWINDEX = new File("/afs/kth.se/misc/info/kurser/DD2350/adk22/labb1/rawindex.txt");
-     private static final File FILE_KORPUS = new File("/afs/kth.se/misc/info/kurser/DD2350/adk22/labb1/korpus");
-     private static final File FILE_A = new File("/var/tmp/Afile.txt");
-     private static final File FILE_I = new File("/var/tmp/Ifile.txt");
-     private static final File FILE_L = new File("/var/tmp/Lfile.txt");
+    private static final File FILE_RAWINDEX = new File("/afs/kth.se/misc/info/kurser/DD2350/adk22/labb1/rawindex.txt");
+    private static final File FILE_KORPUS = new File("/afs/kth.se/misc/info/kurser/DD2350/adk22/labb1/korpus");
+    private static final File FILE_A = new File("/var/tmp/Afile.txt");
+    private static final File FILE_I = new File("/var/tmp/Ifile.txt");
+    private static final File FILE_L = new File("/var/tmp/Lfile.txt");
 
     // Basen som vi kommmer att använda till vår hash-funktion. A till ö motsvarar
     // 29 tecken och mellanslag som 1 (totalt 30).
@@ -550,7 +550,8 @@ class Konkordans {
 
             // Vi ser till så att vi hamnar i mitten.
             mid += I.readLine().length() + 1;
-            String midWord = bufferedReader.readLine().split(" ")[0];
+            // String midWord = p.split(I.readLine())[0];
+            String midWord = I.readLine().split(" ")[0];
             if (midWord.compareTo(searchWord) < 0) {
                 first = mid;
             } else {
