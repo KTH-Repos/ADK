@@ -563,7 +563,7 @@ class Konkordans {
         // Linear search
         while (first <= next) {
             String line = bufferedReader.readLine();
-            String[] lineInfo = bufferedReader.readLine().split(" ");
+            String[] lineInfo = line.split(" ");
             String linearWord = lineInfo[0];
             if (linearWord.equals(searchWord)) {
                 // Starting position of word in P
@@ -572,7 +572,7 @@ class Konkordans {
                 // Starting position of next word in P
                 String lineCheck = bufferedReader.readLine();
                 if (lineCheck != null) { // last line check
-                    returnArray[1] = Integer.parseInt(bufferedReader.readLine().split(" ")[1]);
+                    returnArray[1] = Integer.parseInt(lineCheck.split(" ")[1]);
                 }
 
                 // Number of word occurences
