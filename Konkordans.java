@@ -1,7 +1,7 @@
 import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.regex.Pattern;
+import java.util.Scanner;
 
 /*
  * ADK-2350-LABB 1
@@ -95,11 +95,7 @@ class Konkordans {
             System.out.println("Hittade inte fler / inga: '" + wordToFind + "'.");
         }
 
-        // boolean foundWord = searchWord(wordToFind.toLowerCase());
-        // if (foundWord == true) {
-        // System.out.println("Ordet '" + wordToFind + "' hittades inte.");
-        // }
-
+        // Vi skriver slutligen ut sökprogrammets tid.
         long endTime = System.nanoTime();
         long totalTime = endTime - startTime;
         System.out.printf("SÖKPROGRAMMET - Körtid: %d ms.\n", totalTime / 1000000);
@@ -343,6 +339,12 @@ class Konkordans {
         }
     }
 
+    /**
+     * 
+     * @param wordToFind
+     * @return
+     * @throws IOException
+     */
     private static Boolean searchWord(String wordToFind) throws IOException {
         // Vi börjar med att spara det hashade värdet från wPrefix.
         int hash = wPrefix(wordToFind);
@@ -368,14 +370,13 @@ class Konkordans {
                 i++;
             }
         }
-        System.out.println("Next: " + next);
 
         // Vi söker i I-filen
-        // [position av första instans i L (0), position av sista instans i L
-        // (1), antal förekomster av samma ordet (2)]
+        // [position av första instans i L (0), position av nästa instans i L
+        // (1), antal förekomster av samma ordet (2) (-1 om ordet inte finns)]
         int[] lArray = binarySearch(wordToFind, first, next);
 
-        // Vi tar första instan i L.
+        // Vi tar bytepositionen av första ordet i L.
         int firstL = lArray[0];
 
         // Vi kollar om värdet av firstPosition är lika med -1.
@@ -384,18 +385,22 @@ class Konkordans {
             return false;
         }
 
-        // Vi tar sista instan i L.
+        // Vi tar bytepositionen av nästa ord i L.
         int lastL = lArray[1];
 
         // Vi tar antalet förekomster av samma ord i L.
         int numOfOccur = lArray[2];
 
-        System.out.printf("Det finns %d förekomster av ordet.\n", numOfOccur);
+        System.out.println("Det finns " + numOfOccur + " förekomster av ordet.");
 
-        // Vi söker nu i L-filen.
+        // Vi söker nu i L och KORPUS.
         RandomAccessFile L = new RandomAccessFile(FILE_L, "r");
         RandomAccessFile KORPUS = new RandomAccessFile(FILE_KORPUS, "r");
+
+        // Hoppar till firstL byteposition. (bytepositionen av första ordet i L)
         L.seek(firstL);
+
+        // Vi skapar en bufferedReader.
         BufferedReader bufferedReader = new BufferedReader(
                 new InputStreamReader(new FileInputStream(L.getFD()), ISO_LATIN_1));
 
@@ -404,24 +409,43 @@ class Konkordans {
         if (lastL == -1) {
             String line;
 
+            // Vi läser av en ny rad tills vi hittar en som är tom.
             while ((line = bufferedReader.readLine()) != null) {
 
+                // Vi tar fram bytepositionen
                 int position = Integer.parseInt(line);
+
+                // Skriver ut "lines" från en fil med en angiven position och en längd.
                 printFinalResult(KORPUS, position, wordToFind.length());
             }
         } else {
             int linesPrinted = 0;
+
+            // Vi kollar om första instansen av ordet är mindre än
             while (firstL < lastL && linesPrinted < MAXLINES) {
                 String korpusLine = bufferedReader.readLine();
 
+                // Vi tar fram bytepositionen
                 int position = Integer.parseInt(korpusLine);
+
+                // Skriver ut "lines" från en fil med en angiven position och en längd.
                 printFinalResult(KORPUS, position, wordToFind.length());
 
+                // Vi hoppar till den raden som har sökordet i sig.
                 firstL += korpusLine.length() + 1;
+
+                // Vi ökar antalet utskrivna rader tills det blir 25
                 linesPrinted++;
-                if (linesPrinted == MAXLINES - 1) {
-                    System.out.println("Fler träffar (y/n)?: ");
-                    if (Mio.GetWord().equalsIgnoreCase("y")) {
+
+                // Vi kollar ifall vi ska skriva ut fler sökträffar.
+                if (linesPrinted == (MAXLINES - 1)) {
+
+                    // Vi frågar användaren
+                    System.out.println("Vil du se fler sökträffar (ja/nej)?: ");
+                    Scanner sc = new Scanner(System.in);
+                    String svar = sc.nextLine();
+                    sc.close();
+                    if (svar.equals("ja")) {
                         linesPrinted = 0;
                     } else {
                         return true;
@@ -430,26 +454,34 @@ class Konkordans {
             }
 
         }
+        // Om sökordet inte finns returneras false.
         return false;
     }
 
-    /*
+    /**
      * Skriver ut "lines" från en fil med en angiven position och en längd.
+     * 
+     * @param FILE       filen som läses.
+     * @param position   den angivna positionen.
+     * @param wordLength den angivna längden på ordet.
+     * @throws IOException
      */
     static void printFinalResult(RandomAccessFile FILE, int position, int wordLength) throws IOException {
+
         // 30 tecken före och 30 tecken efter.
         byte[] buffer = new byte[60 + wordLength];
 
-        // Kollar om positionen - 30 är mindre än noll. (Inte finns 30 tecken
-        // framför)
+        // Kollar om positionen - 30 är mindre än noll. (Det finns inte 30 tecken
+        // framför).
         if ((position -= 30) < 0)
             position = 0;
 
         FILE.seek(position);
         FILE.read(buffer);
 
-        // Vi ersätter sedan newline med blanksteg.
+        // Vi ersätter newline med blanksteg.
         for (int i = 0; i < buffer.length; i++) {
+
             // 0xA == ISO_LATIN_1 (newline)
             // 0x20 == ISO_LATIN_1 (space)
             if (buffer[i] == 0xA) {
@@ -457,73 +489,27 @@ class Konkordans {
             }
         }
 
-        // Slutligen skriver vi ut vad vi hadde.
+        // Slutligen skriver vi ut vad vi hade.
         System.out.println(new String(buffer, ISO_LATIN_1));
     }
 
     /**
-     * TODO: SKRIV OM HELA DEN HÄR
-     * Binary search of word in I-file. Switches to linear search at lower distance
-     *
-     * @param searchWord to search in file
-     * @param firstBytes lower byte position of the first three letter words
-     * @param nextBytes  upper byte position of the first three letter words
-     * @return [byte position in P of search word, Byte position of next word,
-     *         Occurrences]. -1 if word not found
-     * @throws IOException from file handling
-     */
-    static int[] binarySearch2(String searchWord, int firstBytes, int nextBytes) throws IOException {
-        RandomAccessFile I = new RandomAccessFile(FILE_I, "r");
-        BufferedReader bufI = new BufferedReader(new InputStreamReader(new FileInputStream(I.getFD()), ISO_LATIN_1));
-        // pre-compile and reuse regex for performance
-        Pattern p = Pattern.compile(" ");
-        int[] retArray = new int[] { -1, -1, 0 };
-
-        // Divide and conquer search
-        while (nextBytes - firstBytes > 1000) {
-            int mid = firstBytes + ((nextBytes - firstBytes) / 2);
-            I.seek(mid);
-            System.out.println("first: " + firstBytes + ", next: " + nextBytes + ", mid: " + mid);
-            mid += I.readLine().length() + 1; // To adjust if seek to middle of line
-            String midWord = p.split(I.readLine())[0];
-            if (midWord.compareTo(searchWord) < 0) {
-                firstBytes = mid;
-            } else {
-                nextBytes = mid;
-            }
-        }
-        I.seek(firstBytes);
-
-        // Linear search
-        while (firstBytes <= nextBytes) {
-            String line = bufI.readLine();
-            String[] lineInfo = p.split(line);
-            String linearWord = lineInfo[0];
-            if (linearWord.equals(searchWord)) {
-                // Starting position of word in P
-                retArray[0] = Integer.parseInt(lineInfo[1]);
-
-                // Starting position of next word in P
-                String lineCheck = bufI.readLine();
-                if (lineCheck != null) { // last line check
-                    retArray[1] = Integer.parseInt(p.split(lineCheck)[1]);
-                }
-
-                // Number of word occurences
-                retArray[2] = Integer.parseInt(lineInfo[2]);
-
-                return retArray;
-            }
-            firstBytes += line.length() + 1;
-        }
-        return retArray;
-    }
-
-    /*
      * Binary Search
+     * Binary Search för I-filen.
      * https://www.geeksforgeeks.org/binary-search/
+     * 
+     * @param searchWord ordet som söks i filen I.
+     * @param first      (lower) första bytepositionen av de 3 bokstäverna.
+     * @param next       (upper) nästa bytepositionen av de 3 bokstäverna.
+     * @return [0] första instans i L (byteposition), [1] sista instans i L
+     *         (byteposition) och [3] hur många gånger ordet förekommer (-1 ordet
+     *         finns inte).
+     * @throws IOException
      */
     static int[] binarySearch(String searchWord, int first, int next) throws IOException {
+
+        // Vi skapar en array som vi uppdaterar.
+        int[] returnArray = new int[] { -1, -1, 0 };
 
         RandomAccessFile I = new RandomAccessFile(FILE_I, "r");
 
@@ -531,26 +517,15 @@ class Konkordans {
         BufferedReader bufferedReader = new BufferedReader(
                 new InputStreamReader(new FileInputStream(I.getFD()), ISO_LATIN_1));
 
-        // Vi skapar en pattern för att kunna använda .split (gör det enkelt och
-        // snabbt). Vi vill splita efter varje " " mellanslag.
-        // Pattern pattern = Pattern.compile(" ");
-
-        // Vi skapar en array som vi uppdaterar.
-        int[] returnArray = new int[] { -1, -1, 0 };
-
-        // ord1
-        // ...
-        // ...
-        // ordn
-
         // Divide and conquer search
         while (next - first > 1000) {
+
+            // Vi ser till att mid är i mellan first och next (adress/bytePosition).
             int mid = first + ((next - first) / 2);
             I.seek(mid);
 
             // Vi ser till så att vi hamnar i mitten.
             mid += I.readLine().length() + 1;
-            // String midWord = p.split(I.readLine())[0];
             String midWord = I.readLine().split(" ")[0];
             if (midWord.compareTo(searchWord) < 0) {
                 first = mid;
