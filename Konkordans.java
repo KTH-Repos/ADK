@@ -20,9 +20,9 @@ class Konkordans {
     // Filer (KTH)
      private static final File FILE_RAWINDEX = new File("/afs/kth.se/misc/info/kurser/DD2350/adk22/labb1/rawindex.txt");
      private static final File FILE_KORPUS = new File("/afs/kth.se/misc/info/kurser/DD2350/adk22/labb1/korpus");
-     private static final File FILE_A = new File("/var/tmp/AAAA.txt");
-     private static final File FILE_I = new File("/var/tmp/IIII.txt");
-     private static final File FILE_L = new File("/var/tmp/LLLL.txt");
+     private static final File FILE_A = new File("/var/tmp/A.txt");
+     private static final File FILE_I = new File("/var/tmp/I.txt");
+     private static final File FILE_L = new File("/var/tmp/L.txt");
 
     // Basen som vi kommmer att använda till vår hash-funktion. A till ö motsvarar
     // 29 tecken och mellanslag som 1 (totalt 30).
@@ -346,14 +346,10 @@ class Konkordans {
     private static Boolean searchWord(String wordToFind) throws IOException {
         // Vi börjar med att spara det hashade värdet från wPrefix.
         int hash = wPrefix(wordToFind);
-        System.out.println("wordToFind: " + wordToFind);
-        System.out.println("Hash: " + hash);
 
         // Vi använder sedan det hashade värdet och tar fram vår första pekare.
         int first = A[hash];
         int next;
-
-        System.out.println("First: " + first);
 
         // Kollar om det hashade värdet motsvarar hashade ööö (slut). Det sista hashade
         // ordet.
@@ -476,7 +472,7 @@ class Konkordans {
      *         Occurrences]. -1 if word not found
      * @throws IOException from file handling
      */
-    static int[] binarySearch(String searchWord, int firstBytes, int nextBytes) throws IOException {
+    static int[] binarySearch2(String searchWord, int firstBytes, int nextBytes) throws IOException {
         RandomAccessFile I = new RandomAccessFile(FILE_I, "r");
         BufferedReader bufI = new BufferedReader(new InputStreamReader(new FileInputStream(I.getFD()), ISO_LATIN_1));
         // pre-compile and reuse regex for performance
@@ -527,7 +523,7 @@ class Konkordans {
      * Binary Search
      * https://www.geeksforgeeks.org/binary-search/
      */
-    static int[] binarySearch2(String searchWord, int first, int next) throws IOException {
+    static int[] binarySearch(String searchWord, int first, int next) throws IOException {
 
         RandomAccessFile I = new RandomAccessFile(FILE_I, "r");
 
