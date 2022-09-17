@@ -444,11 +444,8 @@ class Konkordans {
 
                     // Vi frågar användaren om de vill se fler sökträffar.
                     System.out.println("Vil du se fler sökträffar (ja/nej)?: ");
-                    Scanner sc = new Scanner(System.in);
-                    String svar = sc.nextLine();
-                    sc.close();
-                    if (svar.equals("ja")) {
-                        linesPrinted = 0;
+                    if (Mio.GetWord().equalsIgnoreCase("ja")) {
+                        printedLines = 0;
                     } else {
                         return true;
                     }
@@ -606,8 +603,13 @@ class Konkordans {
      * programmet gör rätt. Ni ska också kunna motivera varför ni valt just dessa
      * testfall.
      * 
-     * algoritmens (Vi kan jämföra svaret som fanns i labblydelsen.)
-     * AlgoRiTmEns (Vi kan kolla ifall vi får samma svar med stora och små bokstäver.)
+     * algoritmens (Vi kan jämföra svaret som fanns i labblydelsen.) - 12 förekomster
+     * AlgoRiTmEns (Vi kan kolla ifall vi får samma svar med stora och små bokstäver.) - 12 förekomster
+     * Amager (Första ordet i korpus.) - 174 förekomster
+     * Mult (Sista ordet i korpus.) - 3 förekomster
+     * A (Enbokstavsord.) - 81096 förekomster
+     * Därefter (Specialtecken.) - 41518 förekomster
+     * BLABXFriluftsfjandetXBLALA (Ett ord som inte existerar.) - 0 förekomster
      * 
      * -----------------------------------------------------------------------------
      * Visa att programmet fungerar och är tillräckligt snabbt för era testfall och labbhandledarens testfall.
