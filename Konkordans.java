@@ -10,19 +10,19 @@ import java.util.Scanner;
  */
 class Konkordans {
 
-    // Filer (lokalt)
-    // private static final File FILE_RAWINDEX = new File("rawindex.txt");
-    // private static final File FILE_KORPUS = new File("korpus");
-    // private static final File FILE_A = new File("A.txt");
-    // private static final File FILE_I = new File("I.txt");
-    // private static final File FILE_L = new File("L.txt");
-
     // Filer (SSH KTH)
     private static final File FILE_RAWINDEX = new File("/afs/kth.se/misc/info/kurser/DD2350/adk22/labb1/rawindex.txt");
     private static final File FILE_KORPUS = new File("/afs/kth.se/misc/info/kurser/DD2350/adk22/labb1/korpus");
     private static final File FILE_A = new File("/var/tmp/Afile.txt");
     private static final File FILE_I = new File("/var/tmp/Ifile.txt");
     private static final File FILE_L = new File("/var/tmp/Lfile.txt");
+
+    // Filer (lokalt)
+    // private static final File FILE_RAWINDEX = new File("rawindex.txt");
+    // private static final File FILE_KORPUS = new File("korpus");
+    // private static final File FILE_A = new File("A.txt");
+    // private static final File FILE_I = new File("I.txt");
+    // private static final File FILE_L = new File("L.txt");
 
     // Basen som vi kommmer att använda till vår hash-funktion. A till ö motsvarar
     // 29 tecken och mellanslag som 1 (totalt 30).
@@ -361,8 +361,8 @@ class Konkordans {
         if (hash == 26999) {
             next = first;
         } else {
-            // Vi håller på tills vi hittar en position i A som inte är tom. Vi behöver det
-            // här i binärsökningen.
+            // Vi håller på tills vi hittar en position i A som inte är tom. (vi tar fram
+            // nästa elementet i vår hash) Vi behöver det i binärsökningen.
             int i = 1;
             while (true) {
                 if ((A[hash + i]) != 0) {
@@ -454,7 +454,6 @@ class Konkordans {
                     }
                 }
             }
-
         }
         // Om sökordet inte finns returneras false.
         return false;
@@ -503,9 +502,9 @@ class Konkordans {
      * @param searchWord ordet som söks i filen I.
      * @param first      (lower) första bytepositionen av de 3 bokstäverna.
      * @param next       (upper) nästa bytepositionen av de 3 bokstäverna.
-     * @return [0] första instans i L (byteposition), [1] sista instans i L
-     *         (byteposition) och [3] hur många gånger ordet förekommer (-1 ordet
-     *         finns inte).
+     * @return [0] start position av ordet i L (byteposition), [1] start position av
+     *         nästa ord i L (byteposition) och [3] hur många gånger ordet
+     *         förekommer (-1 ordet finns inte).
      * @throws IOException
      */
     static int[] binarySearch(String searchWord, int first, int next) throws IOException {
@@ -519,45 +518,64 @@ class Konkordans {
         BufferedReader bufferedReader = new BufferedReader(
                 new InputStreamReader(new FileInputStream(I.getFD()), ISO_LATIN_1));
 
-        while (next - first > 500) {
+        while (next - first > 1000) {
 
             // Vi ser till att mid är i mellan first och next (adress/bytePosition).
-            int mid = first + ((next - first) / 2);
-            I.seek(mid);
+            // int mid = first + ((next - first) / 2);
+            int middle = (first + next) / 2;
+            I.seek(middle);
 
-            // Vi ser till så att vi hamnar i mitten.
-            mid += I.readLine().length() + 1;
-            String midWord = I.readLine().split(" ")[0];
-            if (midWord.compareTo(searchWord) < 0) {
-                first = mid;
-            } else {
-                next = mid;
+            // Vi ser till så att vi hamnar i mitten och sparar sedan det ord som ligger
+            // där.
+            middle += I.readLine().length() + 1;
+            String middleWord = I.readLine().split(" ")[0];
+
+            // Om midWord ligger före searchWord
+            if (middleWord.compareTo(searchWord) < 0) {
+                first = middle;
+            }
+            // Om midWord ligger efter searchWord eller om midWord är searchWord.
+            else {
+                next = middle;
             }
         }
+
+        // Hoppar till first byteposition. (bytepositionen av de 3 bokstäverna)
         I.seek(first);
 
-        // Linear search
+        // Vi får igenom sedan varje "line" för att kunna spara antalet förekomster av
+        // ord, bytepositionen för ordet i L och bytepositionen för nästa ord i L.
         while (first <= next) {
             String line = bufferedReader.readLine();
-            String[] lineInfo = line.split(" ");
-            String linearWord = lineInfo[0];
-            if (linearWord.equals(searchWord)) {
+            String[] checkLine = line.split(" ");
+            String checkWord = checkLine[0];
+
+            // Vi kollar om checkWord är samma som searchWord
+            if (checkWord.equals(searchWord)) {
                 // Starting position of word in P
-                returnArray[0] = Integer.parseInt(lineInfo[1]);
+                returnArray[0] = Integer.parseInt(checkLine[1]);
 
                 // Starting position of next word in P
                 String lineCheck = bufferedReader.readLine();
-                if (lineCheck != null) { // last line check
+
+                // Fall ifall vi är på den sista "line".
+                if (lineCheck != null) {
                     returnArray[1] = Integer.parseInt(lineCheck.split(" ")[1]);
                 }
 
                 // Number of word occurences
-                returnArray[2] = Integer.parseInt(lineInfo[2]);
+                returnArray[2] = Integer.parseInt(checkLine[2]);
 
                 return returnArray;
             }
+
+            // Går till nästa "line"
             first += line.length() + 1;
         }
         return returnArray;
     }
 }
+
+// This code is a part of a search algorithm. It searches for a word in the text
+// and returns the position of the first occurence, the position of the next
+// word and how many times it occurs.
