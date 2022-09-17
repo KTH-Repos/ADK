@@ -17,7 +17,7 @@ class Konkordans {
     // private static final File FILE_I = new File("I.txt");
     // private static final File FILE_L = new File("L.txt");
 
-    // Filer (KTH)
+    // Filer (SSH KTH)
     private static final File FILE_RAWINDEX = new File("/afs/kth.se/misc/info/kurser/DD2350/adk22/labb1/rawindex.txt");
     private static final File FILE_KORPUS = new File("/afs/kth.se/misc/info/kurser/DD2350/adk22/labb1/korpus");
     private static final File FILE_A = new File("/var/tmp/Afile.txt");
@@ -269,7 +269,7 @@ class Konkordans {
     /**
      * String-Based Solution
      * Vi tar fram längden för en int (num).
-     * - https://www.baeldung.com/java-number-of-digits-in-int
+     * https://www.baeldung.com/java-number-of-digits-in-int
      * 
      * @param num det nummer vi ska ta fram längden till.
      * @return längden av num.
@@ -340,12 +340,14 @@ class Konkordans {
     }
 
     /**
-     * 
-     * @param wordToFind
-     * @return
+     * Vi söker efter ett ord med hjälp av filerna vi skapade med konkordans.
+     *
+     * @param wordToFind ordet som ska hittas.
+     * @return om sökordet inte hittades (false), om sökordet hittades (true)
      * @throws IOException
      */
     private static Boolean searchWord(String wordToFind) throws IOException {
+
         // Vi börjar med att spara det hashade värdet från wPrefix.
         int hash = wPrefix(wordToFind);
 
@@ -517,8 +519,7 @@ class Konkordans {
         BufferedReader bufferedReader = new BufferedReader(
                 new InputStreamReader(new FileInputStream(I.getFD()), ISO_LATIN_1));
 
-        // Divide and conquer search
-        while (next - first > 1000) {
+        while (next - first > 500) {
 
             // Vi ser till att mid är i mellan first och next (adress/bytePosition).
             int mid = first + ((next - first) / 2);
