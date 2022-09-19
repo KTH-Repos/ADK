@@ -13,9 +13,9 @@ class Konkordans {
     // Filer (SSH KTH)
     private static final File FILE_RAWINDEX = new File("/afs/kth.se/misc/info/kurser/DD2350/adk22/labb1/rawindex.txt");
     private static final File FILE_KORPUS = new File("/afs/kth.se/misc/info/kurser/DD2350/adk22/labb1/korpus");
-    private static final File FILE_A = new File("/var/tmp/Afile.txt");
-    private static final File FILE_I = new File("/var/tmp/Ifile.txt");
-    private static final File FILE_L = new File("/var/tmp/Lfile.txt");
+    private static final File FILE_A = new File("/var/tmp/A_file.txt");
+    private static final File FILE_I = new File("/var/tmp/I_file.txt");
+    private static final File FILE_L = new File("/var/tmp/L_file.txt");
 
     // Filer (lokalt)
     //private static final File FILE_RAWINDEX = new File("rawindex.txt");
@@ -176,9 +176,7 @@ class Konkordans {
                             A[hash] = iPositon;
                         }
 
-                        // Vi får fram adressen som läggs i A genom att vi lägger ihop längden av
-                        // previousWord, previousLPosition och wordOccurs. Vi lägger även till 3 då
-                        // vår indexering är 3. Värt att notera är att vi har int och inte bytes.
+                        // Vi har 3 blanksteg i I filen. Vi behöver då hoppa med 3 steg for att bytepositionen ska bli rätt. (rad till rad)
                         iPositon += previousWord.length() + getLengthInt(previousLPosition)
                                 + getLengthInt(wordOccurs) + 3;
 
