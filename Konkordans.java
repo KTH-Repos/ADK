@@ -11,18 +11,18 @@ import java.util.Scanner;
 class Konkordans {
 
     // Filer (SSH KTH)
-    /* private static final File FILE_RAWINDEX = new File("/afs/kth.se/misc/info/kurser/DD2350/adk22/labb1/rawindex.txt");
+    private static final File FILE_RAWINDEX = new File("/afs/kth.se/misc/info/kurser/DD2350/adk22/labb1/rawindex.txt");
     private static final File FILE_KORPUS = new File("/afs/kth.se/misc/info/kurser/DD2350/adk22/labb1/korpus");
     private static final File FILE_A = new File("/var/tmp/Afile.txt");
     private static final File FILE_I = new File("/var/tmp/Ifile.txt");
-    private static final File FILE_L = new File("/var/tmp/Lfile.txt"); */
+    private static final File FILE_L = new File("/var/tmp/Lfile.txt");
 
     // Filer (lokalt)
-    private static final File FILE_RAWINDEX = new File("rawindex.txt");
-    private static final File FILE_KORPUS = new File("korpus");
-    private static final File FILE_A = new File("A.txt");
-    private static final File FILE_I = new File("I.txt");
-    private static final File FILE_L = new File("L.txt");
+    //private static final File FILE_RAWINDEX = new File("rawindex.txt");
+    //private static final File FILE_KORPUS = new File("korpus");
+    //private static final File FILE_A = new File("A.txt");
+    //private static final File FILE_I = new File("I.txt");
+    //private static final File FILE_L = new File("L.txt");
 
     // Basen som vi kommmer att använda till vår hash-funktion. A till ö motsvarar
     // 29 tecken och mellanslag som 1 (totalt 30).
@@ -61,16 +61,15 @@ class Konkordans {
         createCharMap();
 
         // Vi kollar ifall längden ifall längden är fel (alltså inte ett).
-        /* if (args.length != 1) {
+        if (args.length != 1) {
             System.out.println("Fel indata: java Konkordans <sökord>");
 
             // Vi tilldelar 1 då ett fel inträffade.
             System.exit(1);
-        } */
+        }
 
         // Vi sparar vilket ordet som ska sökas och hittas.
-        //String wordToFind = args[0];
-        String wordToFind = "algoritmens";
+        String wordToFind = args[0];
 
 
         // Vi kollar ifall filerna finns. Om de inte gör det skapar vi dom i
