@@ -11,18 +11,18 @@ import java.util.Scanner;
 class Konkordans {
 
     // Filer (SSH KTH)
-    private static final File FILE_RAWINDEX = new File("/afs/kth.se/misc/info/kurser/DD2350/adk22/labb1/rawindex.txt");
+    /* private static final File FILE_RAWINDEX = new File("/afs/kth.se/misc/info/kurser/DD2350/adk22/labb1/rawindex.txt");
     private static final File FILE_KORPUS = new File("/afs/kth.se/misc/info/kurser/DD2350/adk22/labb1/korpus");
     private static final File FILE_A = new File("/var/tmp/Afile.txt");
     private static final File FILE_I = new File("/var/tmp/Ifile.txt");
-    private static final File FILE_L = new File("/var/tmp/Lfile.txt");
+    private static final File FILE_L = new File("/var/tmp/Lfile.txt"); */
 
     // Filer (lokalt)
-    // private static final File FILE_RAWINDEX = new File("rawindex.txt");
-    // private static final File FILE_KORPUS = new File("korpus");
-    // private static final File FILE_A = new File("A.txt");
-    // private static final File FILE_I = new File("I.txt");
-    // private static final File FILE_L = new File("L.txt");
+    private static final File FILE_RAWINDEX = new File("rawindex.txt");
+    private static final File FILE_KORPUS = new File("korpus");
+    private static final File FILE_A = new File("A.txt");
+    private static final File FILE_I = new File("I.txt");
+    private static final File FILE_L = new File("L.txt");
 
     // Basen som vi kommmer att använda till vår hash-funktion. A till ö motsvarar
     // 29 tecken och mellanslag som 1 (totalt 30).
@@ -61,15 +61,17 @@ class Konkordans {
         createCharMap();
 
         // Vi kollar ifall längden ifall längden är fel (alltså inte ett).
-        if (args.length != 1) {
+        /* if (args.length != 1) {
             System.out.println("Fel indata: java Konkordans <sökord>");
 
             // Vi tilldelar 1 då ett fel inträffade.
             System.exit(1);
-        }
+        } */
 
         // Vi sparar vilket ordet som ska sökas och hittas.
-        String wordToFind = args[0];
+        //String wordToFind = args[0];
+        String wordToFind = "algoritmens";
+
 
         // Vi kollar ifall filerna finns. Om de inte gör det skapar vi dom i
         // createConstructionFiles-metoden.
@@ -256,13 +258,13 @@ class Konkordans {
         // Vi försöker att läsa in fil A. (OUTPUT)
         try (BufferedOutputStream file_a = new BufferedOutputStream(new FileOutputStream(FILE_A))) {
 
-            // (for-each loop) För varje iPosition i arrayen:
-            for (int iPosition : A) {
-
+                // För varje iPosition i arrayen:
                 // Vi skriver till fil A iPositionen och gör ett mellanslag mellan varje
                 // steg.
-                file_a.write((iPosition + " ").getBytes(ISO_LATIN_1));
-            }
+                for(int i = 0; i < A.length; i++) {
+                    int iPosition = A[i];
+                    file_a.write((iPosition + " ").getBytes(ISO_LATIN_1));
+                }
         }
     }
 
@@ -280,7 +282,7 @@ class Konkordans {
 
     /*
      * Skapar en int-array som omvandlar bokstäverna i det svenska alfabetet till
-     * deras motsvarande ASCII-värde.
+     * deras motsvarande sifferepresentation.
      * CharMap arrayen används sedan i wPrefix.
      */
     private static void createCharMap() {
@@ -328,7 +330,7 @@ class Konkordans {
      */
     private static void loadFromFileA() throws IOException {
         // (Läser från FIL A)
-        // Vi försöker att läsa in fil A. (INPUT)
+        // Vi försöker att läsa ut fil A. (INPUT)
         try (BufferedInputStream file_a = new BufferedInputStream(new FileInputStream(FILE_A))) {
 
             // Vi vet redan hur många läsningar vi kommer att behöva göra och därför kan vi
@@ -507,78 +509,78 @@ class Konkordans {
      */
     static int[] binarySearch(String searchWord, int first, int next) throws IOException {
 
-        // Vi skapar en array som vi uppdaterar.
-        int[] returnArray = new int[] { -1, -1, 0 };
+      // Vi skapar en array som vi uppdaterar.
+      int[] returnArray = new int[] { -1, -1, 0 };
 
-        RandomAccessFile I = new RandomAccessFile(FILE_I, "r");
+      RandomAccessFile I = new RandomAccessFile(FILE_I, "r");
 
-        // Vi skapar en bufferedReader för att kunna läsa "lines".
-        BufferedReader bufferedReader = new BufferedReader(
-                new InputStreamReader(new FileInputStream(I.getFD()), ISO_LATIN_1));
+      // Vi skapar en bufferedReader för att kunna läsa "lines".
+      BufferedReader bufferedReader = new BufferedReader(
+              new InputStreamReader(new FileInputStream(I.getFD()), ISO_LATIN_1));
 
-        while (next - first > 1000) {
+      while (next - first > 1000) {
 
-            // Vi ser till att mid är i mellan first och next (adress/bytePosition).
-            // int mid = first + ((next - first) / 2);
-            int middle = (first + next) / 2;
-            I.seek(middle);
+          // Vi ser till att mid är i mellan first och next (adress/bytePosition).
+          // int mid = first + ((next - first) / 2);
+          int middle = (first + next) / 2;
+          I.seek(middle);
 
-            // Vi ser till så att vi hamnar i mitten och sparar sedan det ord som ligger
-            // där.
-            middle += I.readLine().length() + 1;
-            String middleWord = I.readLine().split(" ")[0];
+          // Vi ser till så att vi hamnar i mitten och sparar sedan det ord som ligger
+          // där.
+          middle += I.readLine().length() + 1;
+          String middleWord = I.readLine().split(" ")[0];
 
-            // Om midWord ligger före searchWord
-            if (middleWord.compareTo(searchWord) < 0) {
-                first = middle;
-            }
-            // Om midWord ligger efter searchWord eller om midWord är searchWord.
-            else {
-                next = middle;
-            }
-        }
+          // Om midWord ligger före searchWord
+          if (middleWord.compareTo(searchWord) < 0) {
+              first = middle;
+          }
+          // Om midWord ligger efter searchWord eller om midWord är searchWord.
+          else {
+              next = middle;
+          }
+      }
 
-        // Hoppar till first byteposition. (bytepositionen av de 3 bokstäverna)
-        I.seek(first);
+      // Hoppar till first byteposition. (bytepositionen av de 3 bokstäverna)
+      I.seek(first);
 
-        // Vi får igenom sedan varje "line" för att kunna spara antalet förekomster av
-        // ord, bytepositionen för ordet i L och bytepositionen för nästa ord i L.
-        while (first <= next) {
-            String line = bufferedReader.readLine();
-            String[] checkLine = line.split(" ");
-            String checkWord = checkLine[0];
+      // Vi får igenom sedan varje "line" för att kunna spara antalet förekomster av
+      // ord, bytepositionen för ordet i L och bytepositionen för nästa ord i L.
+      while (first <= next) {
+          String line = bufferedReader.readLine();
+          String[] checkLine = line.split(" ");
+          String checkWord = checkLine[0];
 
-            // Vi kollar om checkWord är samma som searchWord
-            if (checkWord.equals(searchWord)) {
+          // Vi kollar om checkWord är samma som searchWord
+          if (checkWord.equals(searchWord)) {
 
-                // Vi sparar "start postion" av ordet i L.
-                returnArray[0] = Integer.parseInt(checkLine[1]);
+              // Vi sparar "start postion" av ordet i L.
+              returnArray[0] = Integer.parseInt(checkLine[1]);
 
-                // Vi tar "start position" av nästa ord i L.
-                String lineCheck = bufferedReader.readLine();
+              // Vi tar "start position" av nästa ord i L.
+              String lineCheck = bufferedReader.readLine();
 
-                // Fall ifall vi är på den sista "line". (bufferedReader.readLine() ger null om
-                // slut)
-                if (lineCheck != null) {
+              // Fall ifall vi är på den sista "line". (bufferedReader.readLine() ger null om
+              // slut)
+              if (lineCheck != null) {
 
-                    // Ifall det är slutet så sparar vi positionen vi fick innan.
-                    returnArray[1] = Integer.parseInt(lineCheck.split(" ")[1]);
-                }
+                  // Ifall det är slutet så sparar vi positionen vi fick innan.
+                  returnArray[1] = Integer.parseInt(lineCheck.split(" ")[1]);
+              }
 
-                // Vi sparar hur många gånger ordet förekommer.
-                returnArray[2] = Integer.parseInt(checkLine[2]);
+              // Vi sparar hur många gånger ordet förekommer.
+              returnArray[2] = Integer.parseInt(checkLine[2]);
 
-                // Vi returnerar arrayen med informationen.
-                return returnArray;
-            }
+              // Vi returnerar arrayen med informationen.
+              return returnArray;
+          }
 
-            // Går till nästa "line"
-            first += line.length() + 1;
-        }
+          // Går till nästa "line"
+          first += line.length() + 1;
+      }
 
-        // Vi returnerar arrayen med informationen.
-        return returnArray;
-    }
+      // Vi returnerar arrayen med informationen.
+      return returnArray;
+  }
 
     // ###########################################################################################################
     // Reflektion
