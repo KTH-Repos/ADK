@@ -1,7 +1,6 @@
 import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.Scanner;
 
 /*
  * ADK-2350-LABB 1
