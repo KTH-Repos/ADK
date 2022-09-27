@@ -14,6 +14,7 @@ import java.util.List;
 
 public class Main {
 
+  // Det framgår på Kattis att det längsta ordet är 40 karaktärer.
   private static int[][] m = new int[41][41];
 
   public static final String DEFAULT_DIR = "./test";
