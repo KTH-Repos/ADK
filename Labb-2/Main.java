@@ -14,7 +14,7 @@ import java.util.List;
 
 public class Main {
 
-  private static int[][] a = new int[22][22];
+  private static int[][] m = new int[41][41];
 
   public static final String DEFAULT_DIR = "./test";
 
@@ -30,6 +30,15 @@ public class Main {
   }
 
   public static void main(String args[]) throws IOException {
+
+    // Fyller i matrisen längs första kolumnet och första raden.
+    for (int i = 0; i < m.length; i++) {
+      m[i][0] = i;
+    }
+    for (int j = 0; j < m.length; j++) {
+      m[0][j] = j;
+    }
+
     if (parseArgs(args)) {
       System.exit(0);
     }
@@ -40,7 +49,7 @@ public class Main {
     List<String> wordList = readWordList(stdin);
     String word;
     while ((word = stdin.readLine()) != null) {
-      ClosestWords closestWords = new ClosestWords(word, wordList, a);
+      ClosestWords closestWords = new ClosestWords(word, wordList, m);
       System.out.print(word + " (" + closestWords.getMinDistance() + ")");
       for (String w : closestWords.getClosestWords())
         System.out.print(" " + w);
@@ -128,7 +137,7 @@ public class Main {
     String word;
     try {
       while ((word = inFile.readLine()) != null) {
-        ClosestWords closestWords = new ClosestWords(word, wordList, a);
+        ClosestWords closestWords = new ClosestWords(word, wordList, m);
         String answerLine;
         if ((answerLine = ansFile.readLine()) == null) {
           System.err.println("The file " + ans + " ran out of answers but there were questions left in " + in + ".");

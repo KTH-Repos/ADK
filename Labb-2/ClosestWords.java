@@ -10,15 +10,15 @@ public class ClosestWords {
 
   int closestDistance = -1;
 
+  static String senasteOrdetW2 = "";
+  static String senasteOrdetW1 = "";
+
   static int partDist(String w1, String w2, int w1len, int w2len, int m[][]) {
 
-    // Fyller i matrisen längs första kolumnet och första raden.
-    for (int i = 0; i <= w1len; i++) {
-      m[i][0] = i;
-    }
-    for (int j = 0; j <= w2len; j++) {
-      m[0][j] = j;
-    }
+    int p = 0;
+    if (senasteOrdetW1 == w1) 
+      p = sammaOrd(w2, senasteOrdetW2);
+
 
     int laggtill = 0;
     int tabort = 0;
@@ -27,7 +27,10 @@ public class ClosestWords {
     // Vi går igenom de andra elementen (algoritmen) från teorilabb 2.
     for (int i = 1; i <= w1len; i++) {
 
-      for (int j = 1; j <= w2len; j++) {
+      // Notera att vi använder p + 1 här som i sista delen från teorilabb 2. Vi
+      // behöver
+      // inte skapa de gamla elementen som är samma.
+      for (int j = p + 1; j <= w2len; j++) {
 
         if (w1.charAt(i - 1) == w2.charAt(j - 1)) {
           bytut = m[i - 1][j - 1];
@@ -41,27 +44,37 @@ public class ClosestWords {
         m[i][j] = min(laggtill, tabort, bytut);
       }
     }
+    senasteOrdetW1 = w1;
+    senasteOrdetW2 = w2;
+
     return m[w1len][w2len];
+  }
 
-    // if (w1len == 0)
-    // return w2len;
+  /**
+   * Finds the number of first same letters in w1 and w2
+   * 
+   * @param w1
+   * @param w2
+   * @return the number of equal first letters in w1 and w2
+   */
+  static int sammaOrd(String w2, String senasteOrdet) {
+    int i = 0;
+    int minLength = min(w2.length(), senasteOrdet.length());
 
-    // if (w2len == 0)
-    // return w1len;
+    // Vi går igenom längden av det minsta ordet.
+    while (i < minLength) {
 
-    // int res = partDist(w1, w2, w1len - 1, w2len - 1) +
-    // (w1.charAt(w1len - 1) == w2.charAt(w2len - 1) ? 0 : 1);
-
-    // int addLetter = partDist(w1, w2, w1len - 1, w2len) + 1;
-
-    // if (addLetter < res)
-    // res = addLetter;
-
-    // int deleteLetter = partDist(w1, w2, w1len, w2len - 1) + 1;
-
-    // if (deleteLetter < res)
-    // res = deleteLetter;
-    // return res;
+      // Om första elementet är samma ökar vi indexen med 1.
+      if (w2.charAt(i) == senasteOrdet.charAt(i)) {
+        i++;
+      } 
+      // Vi fortsätter att göra detta tills karaktärena i orden skiljer sig.
+      else {
+        break;
+      }
+    }
+    // Slutligen returnerar vi indexen som ett värde hur många av de första bokstäverna som är lika.
+    return i;
   }
 
   // Returnera det minsta elementet av a, b och c.
@@ -74,6 +87,14 @@ public class ClosestWords {
       return c;
   }
 
+    // Returnera det minsta elementet av a och b.
+    static int min(int a, int b) {
+      if (a <= b)
+        return a;
+      else
+        return b;
+    }
+
   int distance(String w1, String w2, int m[][]) {
     return partDist(w1, w2, w1.length(), w2.length(), m);
   }
@@ -83,7 +104,7 @@ public class ClosestWords {
     for (String s : wordList) {
       int dist = distance(w, s, m);
 
-      // System.out.println("d(" + w + "," + s + ")=" + dist);
+      //System.out.println("d(" + w + "," + s + ")=" + dist);
 
       if (dist < closestDistance || closestDistance == -1) {
         closestDistance = dist;
