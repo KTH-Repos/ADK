@@ -19,6 +19,7 @@ public class Main {
 
   public static final String DEFAULT_DIR = "./test";
 
+  // Kommer från labben.
   public static List<String> readWordList(BufferedReader input) throws IOException {
     LinkedList<String> list = new LinkedList<String>();
     while (true) {
@@ -32,7 +33,7 @@ public class Main {
 
   public static void main(String args[]) throws IOException {
 
-    // Fyller i matrisen längs första kolumnet och första raden.
+    // Fyller i matrisen längs första kolumnen och första raden.
     for (int i = 0; i < m.length; i++) {
       m[i][0] = i;
     }
@@ -40,6 +41,7 @@ public class Main {
       m[0][j] = j;
     }
 
+    // Resterande kommer från labben.
     if (parseArgs(args)) {
       System.exit(0);
     }
@@ -58,9 +60,9 @@ public class Main {
     }
     // long tottime = (System.currentTimeMillis() - t1);
     // System.out.println("CPU time: " + tottime + " ms");
-
   }
 
+  // Kommer från labben.
   private static boolean parseArgs(String[] args) {
     boolean inTestZone = false;
     boolean beenInTestZone = false;
@@ -111,6 +113,7 @@ public class Main {
     }
   }
 
+  // Kommer från labben.
   public static void runSingleTestCase(String path, String name, String in, String ans) {
     System.out.println("Processing testcase: " + name);
     long t1 = System.currentTimeMillis();

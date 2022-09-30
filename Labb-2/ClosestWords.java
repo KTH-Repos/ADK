@@ -151,6 +151,7 @@ public class ClosestWords {
   }
 
   /**
+   * Denna fick vi från labben.
    * Returnerar den minsta distansen (closetDistance).
    */
   int getMinDistance() {
@@ -158,6 +159,7 @@ public class ClosestWords {
   }
 
   /**
+   * Denna fick vi från labben.
    * Returnerar en lista(string) med de närmaste orden.
    */
   List<String> getClosestWords() {
