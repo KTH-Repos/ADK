@@ -1,3 +1,6 @@
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Exempel på in- och utdatahantering för maxflödeslabben i kursen
  * ADK.
@@ -25,6 +28,9 @@ public class BipRed {
 			graph[i] = new Node(i);
 		}
 
+		List<Node> Xnodes = new ArrayList<>();
+		List<Node> Ynodes = new ArrayList<>();
+
 		// Läs in kanterna
 		Node[][] edges = new Node[e][2];
 		for (int i = 0; i < e; ++i) {
@@ -32,12 +38,16 @@ public class BipRed {
 			int b = io.getInt();
 
 			edges[i][0] = new Node(a);
+			Xnodes.add(edges[i][0]);
 			edges[i][1] = new Node(b);
+			Ynodes.add(edges[i][1]);
 		}
+		// TODO: Lägg till källa och sänka genom att skapa två nya noder
+		// writeFlowGraph(nodes+2, e, s, t);
 	}
 
-	void writeFlowGraph() {
-		int v = 23, e = 0, s = 1, t = 2;
+	void writeFlowGraph(int v, int e, int s, int t) {
+		// int v = 23, e = 0, s = 1, t = 2;
 
 		// Skriv ut antal hörn och kanter samt källa och sänka
 		io.println(v);
@@ -92,7 +102,7 @@ public class BipRed {
 		io = new Kattio(System.in, System.out);
 
 		readBipartiteGraph();
-		writeFlowGraph();
+		// writeFlowGraph();
 
 		readMaxFlowSolution();
 
