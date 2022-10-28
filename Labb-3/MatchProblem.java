@@ -1,6 +1,6 @@
 
 /**
- * Steg 1 av 3
+ * Steg 1 av 3 (Reducera problemet till flödesproblemet)
  * Kommando:
  * ./combine java MatchProblem \; ./maxflow < graffil.indata > matchfil.utdata
  * 
@@ -92,10 +92,10 @@ public class MatchProblem {
         // Debugutskrift
         // System.err.println("Skickade iväg flödesgrafen");
 
-        readMaxFlowSolution(x, y);
+        readFlowProblem(x, y);
     }
 
-    void readMaxFlowSolution(int x, int y) {
+    void readFlowProblem(int x, int y) {
         // Läs in antal hörn, kanter, källa, sänka, och totalt flöde
         // (Antal hörn, källa och sänka borde vara samma som vi i grafen vi
         // skickade iväg)
@@ -120,7 +120,7 @@ public class MatchProblem {
             b = io.getInt();
             flow = io.getInt();
 
-            if (a != source && b != sanka) {
+            if (b != sanka && a != source) {
                 io.println((a - 1) + " " + (b - 1));
             }
         }

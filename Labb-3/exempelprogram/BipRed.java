@@ -25,7 +25,7 @@ public class BipRed {
 		int nodes = x + y;
 		graph = new Node[nodes];
 		for (int i = 1; i < nodes; i++) {
-			graph[i] = new Node(i);
+			// graph[i] = new Node(i);
 		}
 
 		List<Node> Xnodes = new ArrayList<>();
@@ -37,9 +37,9 @@ public class BipRed {
 			int a = io.getInt();
 			int b = io.getInt();
 
-			edges[i][0] = new Node(a);
+			// edges[i][0] = new Node(a);
 			Xnodes.add(edges[i][0]);
-			edges[i][1] = new Node(b);
+			// edges[i][1] = new Node(b);
 			Ynodes.add(edges[i][1]);
 		}
 		// TODO: Lägg till källa och sänka genom att skapa två nya noder
