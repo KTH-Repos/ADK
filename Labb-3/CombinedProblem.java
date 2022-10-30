@@ -14,13 +14,17 @@ public class CombinedProblem {
 
     public static void main(String args[]) {
         new CombinedProblem();
+
     }
 
     CombinedProblem() {
         io = new Kattio(System.in, System.out);
+        long start2 = System.currentTimeMillis();
 
         readBipartiteGraph();
 
+        long end2 = System.currentTimeMillis();
+        System.out.println("Elapsed Time in seconds: " + (end2 - start2) / 1000);
         // Kom ihåg att stänga ner Kattio-klassen
         io.close();
     }
@@ -97,10 +101,11 @@ public class CombinedProblem {
         // Debugutskrift
         // System.err.println("Skickade iväg flödesgrafen");
 
-        System.err.println("writeFlowGraph: " + sb.toString());
+        // System.err.println("writeFlowGraph: " + sb.toString());
+        // System.out.println("Im here!!");
         String flowProblem = solveFlowProblem(sb.toString());
 
-        // readFlowProblem(flowProblem, x, y);
+        readFlowProblem(flowProblem, x, y);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -125,10 +130,10 @@ public class CombinedProblem {
 
         // Skriver ut antal Xnoder och Ynoder.
         System.out.println(x + " " + y);
-        System.err.println(x + " " + y);
+        // System.err.println(x + " " + y);
         // Skriver ut det totala flödet.
         System.out.println(totflow);
-        System.err.println(totflow);
+        // System.err.println(totflow);
         for (int i = 0; i < e; ++i) {
             // Flöde f från a till b
             a = io.getInt();
@@ -214,9 +219,11 @@ public class CombinedProblem {
                 }
             }
         }
-        String solution = (vertexs - 1 + "\n" + source + " " + sankan + " " + totalFlow + "\n" + posEdges + "\n");
+
+        String solution = (vertexs - 1 + "\n" + source + " " + sankan + " " +
+                totalFlow + "\n" + posEdges + "\n");
         solution += sb.toString();
-        System.err.println("solveFlowProblem: " + solution);
+        // System.err.println(solution);
         return solution;
     }
 
