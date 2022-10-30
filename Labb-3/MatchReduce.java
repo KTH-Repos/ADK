@@ -1,18 +1,19 @@
 /**
  * Steg 1 av 3
  * Kommando:
- * ./combine java MatchProblem \; ./maxflow < graffil.indata > matchfil.utdata
+ * /afs/kth.se/misc/info/kurser/DD2350/adk22/labb3/combine java MatchReduce \;
+ * /afs/kth.se/misc/info/kurser/DD2350/adk22/labb3/maxflow < graffil > matchfil
  * 
  */
 
-public class MatchProblem {
+public class MatchReduce {
     Kattio io;
 
     public static void main(String args[]) {
-        new MatchProblem();
+        new MatchReduce();
     }
 
-    MatchProblem() {
+    MatchReduce() {
         io = new Kattio(System.in, System.out);
 
         readBipartiteGraph();
@@ -91,7 +92,7 @@ public class MatchProblem {
         // Debugutskrift
         // System.err.println("Skickade iväg flödesgrafen");
 
-        // readMaxFlowSolution(x, y);
+        readMaxFlowSolution(x, y);
     }
 
     void readMaxFlowSolution(int x, int y) {

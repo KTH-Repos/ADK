@@ -1,5 +1,12 @@
 import java.util.*;
 
+/**
+ * Steg 2 av 3 (Flödesproblemet)
+ * Kommando:
+ * java FlowProblem < graffil > matchfil
+ * 
+ */
+
 public class FlowProblem {
     Kattio io;
 
