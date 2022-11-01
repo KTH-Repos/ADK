@@ -1,17 +1,10 @@
-class Edge {
+public class Edge {
+    int s, t, rev, cap, f;
 
-    int u, v, flow, capacity;
-    Edge reverse;
-
-    public Edge(int u, int v, int flow, int capacity) {
-        this.u = u;
-        this.v = v;
-        this.flow = flow;
-        this.capacity = capacity;
+    public Edge(int s, int t, int rev, int cap) {
+        this.s = s;
+        this.t = t;
+        this.rev = rev;
+        this.cap = cap;
     }
-
-    public void setReverse(Edge e) {
-        reverse = e;
-    }
-
 }

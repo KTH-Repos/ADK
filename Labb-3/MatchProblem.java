@@ -91,7 +91,7 @@ public class MatchProblem {
         // Debugutskrift
         // System.err.println("Skickade iväg flödesgrafen");
 
-        // readMaxFlowSolution(x, y);
+        readMaxFlowSolution(x, y);
     }
 
     void readMaxFlowSolution(int x, int y) {
