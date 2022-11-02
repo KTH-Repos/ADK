@@ -1,7 +1,8 @@
 /**
  * Steg 1 av 3
  * Kommando:
- * ./combine java MatchProblem \; ./maxflow < graffil.indata > matchfil.utdata
+ * /afs/kth.se/misc/info/kurser/DD2350/adk22/labb3/combine java MatchReduce \;
+ * /afs/kth.se/misc/info/kurser/DD2350/adk22/labb3/maxflow < graffil > matchfil
  * 
  */
 
