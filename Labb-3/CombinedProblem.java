@@ -5,7 +5,7 @@ import java.util.ArrayList;
 /**
  * Steg 3 av 3 (Kombinera steg 1 & 2)
  * Kommando:
- * java CombinedProblem < graffil.indata > matchfil.utdata
+ * java CombinedProblem < graffil > matchfil
  * 
  */
 

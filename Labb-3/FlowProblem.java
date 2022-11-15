@@ -30,9 +30,11 @@ public class FlowProblem {
         int flow = 0;
         // Vi skapar en ny int array med längden av grafen.
         int[] nodeList = new int[graph.length];
+
+        // BFS
         while (true) {
             int temp = 0;
-            // Vi sätter värdet av s på alla platser i q.
+            // Vi sätter värdet av SOURCE på alla platser i nodeList index temp.
             nodeList[temp++] = source;
             // Vi skapar en Edge array med längden av grafen.
             Edge[] edgeList = new Edge[graph.length];
@@ -49,7 +51,7 @@ public class FlowProblem {
                 }
             }
 
-            // Om sänken inte nåddes så skriver vi bara ut maxflow.
+            // Om sänken inte nåddes så skriver vi bara ut maxflow. // breakar ut
             if (edgeList[sankan] == null) {
                 break;
             }
@@ -61,11 +63,13 @@ public class FlowProblem {
                 pushFlow = Math.min(pushFlow, edgeList[u].cap - edgeList[u].f);
             }
 
-            // Sedan uppdater vi kanterna med minimala flow.
+            // Sedan uppdater vi kanterna med minimala flow längst stigarna.
             for (int u = sankan; u != source; u = edgeList[u].s) {
                 edgeList[u].f += pushFlow;
+                // Tar bort för reverese
                 graph[edgeList[u].t].get(edgeList[u].rev).f -= pushFlow;
             }
+            // Maxflödet kommer vara summan av alla minimala flödet längs alla stigarna.
             flow += pushFlow;
         }
 
