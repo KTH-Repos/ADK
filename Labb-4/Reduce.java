@@ -4,8 +4,38 @@ import java.util.HashMap;
 // Steg 2. java Reduce < ./testfall/in.txt > out.txt
 // Steg 3. /afs/kth.se/misc/info/kurser/DD2350/adk22/labb4/verifyLab4 < out.txt
 
+// Varför är rollbesättningsproblemet NP-svårt?
+// Svar: För inputen till rollbesättningsproblemet kan reduceras från inputen till
+// graffärgningsproblemet, vilket är ett känt NP-fullständigt problem. Reduktionen 
+// genomförs på polynomisk tid.  
+
+// Vad komplexiteten är för din reduktion?
+// Svar: O(E + V^2 + V^2 + E) = O(V^2 + E) --> Polynomisk tid? JA!
+
 public class Reduce {
     Kattio io;
+
+    // Denna fick vi från teorilabben uppgift 4.
+    // 4) Vilken är den minsta möjliga produktion som uppfyller indatakraven för
+    // rollbesättningsproblemet och som går att sätta upp? Skriv upp indata för
+    // denna produktion!
+    // Svar: Den minsta möjliga produktionen ska ha 3 roller, 2 scener och 3
+    // skådisar för att p1 och p2
+    // inte ska vara i samma scener. Då ser vi till att detta problem är redan löst
+    // i basfallet.
+    final int BASECASE_ROLLER = 3;
+    final int BASECASE_SCENER = 2;
+    final int BASECASE_SKADESPELARE = 3;
+    final int MAX_KANTER = 25000 * 2; // Vi multiplcererar med två då vi sparar i första positionen rollen och andra
+                                      // vilken skådespelare. EX. 0 -> 1 (roll) 1 -> 1 (skådis)
+
+    // Vi skapar variabler för V, E och m.
+    int V;
+    int E;
+    int m;
+
+    HashMap<Integer, Integer> roller = new HashMap<>();
+    int kanter[] = new int[MAX_KANTER];
 
     public static void main(String[] args) {
         new Reduce();
@@ -29,56 +59,45 @@ public class Reduce {
          * från 1 till V)
          */
 
-        // Denna fick vi från teorilabben uppgift 4.
-        // 4) Vilken är den minsta möjliga produktion som uppfyller indatakraven för
-        // rollbesättningsproblemet och som går att sätta upp? Skriv upp indata för
-        // denna produktion!
-        final int BASECASE_ROLLER = 3;
-        final int BASECASE_SCENER = 2;
-        final int BASECASE_SKADESPELARE = 3;
-        final int MAX_KANTER = 25000 * 2; // Vi multiplcererar med två då vi sparar i första positionen rollen och andra
-                                          // vilken skådespelare. EX. 0 -> 1 (roll) 1 -> 1 (skådis)
-
-        int V;
-        int E;
-        int m;
-
+        // Vi läser in dessa från filen.
         V = io.getInt(); // Antal roller -> antal hörn (nodes)
         E = io.getInt(); // Antal scener -> antal kanter
         m = io.getInt(); // Antal skådespelare -> antal färger
 
-        // TODO: Skriv om
-        // add vertices that are not isolated -> roles
-        // store edges in edges array
-        // O(e)
+        // Vi skapar grafen.
+        createGraph();
+
+        // Vi skriver ut resultatet.
+        writeOutput();
+
+        io.flush();
+        io.close();
+    }
+
+    void createGraph() {
+        // Vi läser in grafen.
+        int a, b, index = 0;
 
         // Vi går igenom alla roller som tilldelar skådespelare. Vi lägger till dom i en
-        // HashMap och i en array för alla kanter.
+        // HashMap och i en array för alla kanter. Vi använder en HashMap för att enkelt
+        // kunna ta fram och ändra.
         // Tidskomplexitet: O(E)
-        HashMap<Integer, Integer> roller = new HashMap<>();
-        int kanter[] = new int[MAX_KANTER];
-        int roll;
-        int skadis;
-        int index = 0;
-
         for (int i = 0; i < E; i++) { // Lydelsen: Varje roll förekommer högst en gång på varje sådan rad, så antalet
                                       // roller på en rad ligger mellan 2 och n.
-            roll = io.getInt();
-            skadis = io.getInt();
-            roller.put(roll, roll);
-            roller.put(skadis, skadis);
-
-            kanter[index] = roll;
-            kanter[index + 1] = skadis;
+            a = io.getInt();
+            b = io.getInt();
+            roller.put(a, a);
+            roller.put(b, b);
+            kanter[index] = a;
+            kanter[index + 1] = b;
             index += 2; // Vi ökar med två då vi använde två positioner.
         }
 
-        // TODO: Skriv om
-        // do not keep isolated vertices
-        // adjust the values in map due to isolated vertices
-        // O(v^2)
-
-        // Vi tar bort alla hörn som är isolerade och ändrar värderna i vår HashMap.
+        // Det kan förekomma isolerade hörn i inputen till graffärgningsproblemet
+        // Vi ska inte ha isolerade hörn för de representerar roller som inte ingår i
+        // någon scen.
+        // Vi vill spara hörn som är isolerade genom att ändrar värderna i vår
+        // HashMap som vi skapade tidigare.
         // Tidskomplexitet: O(V^2)
         int isolated = 0;
         for (int i = 1; i <= V; i++) {
@@ -92,21 +111,23 @@ public class Reduce {
             }
         }
         V -= isolated;
+    }
 
+    void writeOutput() {
         // Vi skapar nya variabler för det vi ska skriva ut.
         int rollerOut = V + BASECASE_ROLLER;
         int scenerOut = E + BASECASE_SCENER;
         int skadespelareOut;
 
-        // 1 <= m <= 1 073 741 824 and 1 <= v <= 300
-        // next loop will be O(v*m)
-        // but m >= v -> always yes instance. So if m > v, we can limit m to m = v.
-        // this will mean that at worst case loop runs for O(v^2)
+        // Enligt labblydelsen låg m mellan 1 <= m <= 2^30 och v mellan 1 <= V <= 300
+        // m >= V kommer alltid att vara en ja-instans. Ifall m skulle vara större än V
+        // så kan vi ansätta m till V. (m = V om m > V) Vi får då: O(V^2) på nästa loop.
         if (m > V) {
             m = V;
         }
         skadespelareOut = m + BASECASE_SKADESPELARE;
 
+        // Vi skapar en StringBuilder sb.
         StringBuilder sb = new StringBuilder();
 
         // ----# Vi skriver först ut antal roller, scener och skådespelare. #----
@@ -118,10 +139,11 @@ public class Reduce {
         sb.append("1 2\n");
         sb.append("1 3\n");
 
-        // O(V^2)
+        // Alla roller som kan tas av alla skådespelare.
+        // Tidskomplexitet: O(V^2) ty skadespelareOut = m = V.
         for (int i = 0; i < V; i++) {
             sb.append(m + " ");
-            for (int j = 3; j < skadespelareOut; j++) {
+            for (int j = BASECASE_ROLLER; j < skadespelareOut; j++) {
                 sb.append(j + " ");
             }
             sb.append("\n");
@@ -131,19 +153,17 @@ public class Reduce {
         sb.append("2 1 3\n");
         sb.append("2 2 3\n");
 
-        // O(e)
+        // Vi skriver ut alla resterande scener och de roller som används.
+        // Tidskomplexitet: O(E)
         int i = 0;
         while (kanter[i] != 0) {
-            sb.append("2").append(" ").append(roller.get(kanter[i]) + BASECASE_ROLLER).append(" ")
+            sb.append("2 ").append(roller.get(kanter[i]) + BASECASE_ROLLER).append(" ")
                     .append(roller.get(kanter[i + 1]) + BASECASE_ROLLER)
                     .append("\n");
             i += 2;
         }
 
-        // Vi skriver ut det vi har sparat i vår StringBuilder med Kattio.
+        // Skriver ut det vi har sparat i StringBuilder:n.
         io.print(sb);
-
-        io.flush();
-        io.close();
     }
 }
