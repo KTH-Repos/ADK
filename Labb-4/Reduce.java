@@ -157,8 +157,10 @@ public class Reduce {
         // Tidskomplexitet: O(E)
         int i = 0;
         while (kanter[i] != 0) {
-            sb.append("2 ").append(roller.get(kanter[i]) + BASECASE_ROLLER).append(" ")
-                    .append(roller.get(kanter[i + 1]) + BASECASE_ROLLER)
+            int rollOne = roller.get(kanter[i]) + BASECASE_ROLLER;
+            int rollTwo = roller.get(kanter[i + 1]) + BASECASE_ROLLER;
+            sb.append("2 ").append(rollOne).append(" ")
+                    .append(rollTwo)
                     .append("\n");
             i += 2;
         }
