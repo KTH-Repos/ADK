@@ -41,17 +41,16 @@ public class ReduceTwo {
         E = io.getInt();
         m = io.getInt();
 
-        // Vi skapar tre variabler: a,b och index.
-        int a, b, index = 0;
+        // Vi skapar tre variabler: a,b.
+        int a, b;
 
         // Vi går igenom alla kanter
         // --Tidskomplexitet: O(E)
         for (int i = 0; i < E; i++) {
             a = io.getInt();
             b = io.getInt();
-            kanter[index][0] = a;
-            kanter[index][1] = b;
-            index++;
+            kanter[i][0] = a;
+            kanter[i][1] = b;
         }
 
         int rollerOut = V + BASECASE_ROLLER;
@@ -69,6 +68,8 @@ public class ReduceTwo {
         skadespelareOut = m + BASECASE_SKADESPELARE;
 
         StringBuilder sb = new StringBuilder();
+
+        // ----# Vi skriver ut roller, scener och skådespelare först #----
 
         sb.append(rollerOut).append("\n").append(scenerOut).append("\n").append(skadespelareOut).append("\n");
 
