@@ -1,5 +1,5 @@
-// Steg 1. javac Reduce.java
-// Steg 2. java Reduce < ./testfall/in.txt > out.txt
+// Steg 1. javac ReduceTwo.java
+// Steg 2. java ReduceTwo < ./testfall/in.txt > out.txt
 // Steg 3. /afs/kth.se/misc/info/kurser/DD2350/adk22/labb4/verifyLab4 < out.txt
 
 // Varför är rollbesättningsproblemet NP-svårt?
