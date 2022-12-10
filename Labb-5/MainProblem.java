@@ -63,19 +63,21 @@ public class MainProblem {
     }
 
     /**
-     * TODO: ÄNDRA
-     * Finds valid roles for actor1 and actor2.
-     * Then, assigns roles to remaining actors in a greedy manner.
-     * If there are still unassigned roles, use super actors to assign these roles.
+     * Vårt första mål är att hitta roller för skådis 1 och 2.
+     * Vårt andra mål är att sätta alla resterande roller till skådisar (girigt)
+     * Slutligen om det fortfarande finns tomma roller lägger vi till superactors.
      */
     void assignRoles() {
+        // --- Vårt första mål är att hitta roller för skådis 1 och 2.
+
+        // Vi skapar två tomma ArrayListor - skadis1 och skadis2 
         ArrayList<Integer> skadis1 = new ArrayList<>();
         ArrayList<Integer> skadis2 = new ArrayList<>();
 
         // Vi skapar två listor för skådas 1 och 2 med alla roller de kan spela.
         for (int i = 0; i < roles.size(); i++) {
             if (roles.get(i).contains(1)) {
-                skadis1.add(i + 1);
+                skadis1.add(i + 1); // Vi lägger till 1 för att indexeringen ska bli rätt.
             }
             if (roles.get(i).contains(2)) {
                 skadis2.add(i + 1);
@@ -86,21 +88,23 @@ public class MainProblem {
         // System.out.println("skadis1: " + skadis1.toString());
         // System.out.println("skadis2: " + skadis2.toString());
         // System.out.println("actors: " + actors.toString());
+        // System.out.println("roles: " + roles.toString());
+        // System.out.println("scenes: " + scenes.toString());
 
         // Väljer vilken roll skådis 1 och 2 bör ta.
         for (int i = 0; i < skadis1.size(); i++) {
             for (int j = 0; j < skadis2.size(); j++) {
-                if (rolesValid(skadis1.get(i), skadis2.get(j))) {
-                    // Vi lägger skadis1 och skadis2 roll till listan "actors" och rensar sedan.
+                if (isRolesValid(skadis1.get(i), skadis2.get(j))) {
+                    // Vi lägger skadis1 och skadis2 roll till listan "actors" och rensar sedan skådisarna i rollerna.
                     actors.get(0).add(skadis1.get(i));
-                    roles.get(skadis1.get(i) - 1).clear();
+                    roles.get(skadis1.get(i) - 1).clear(); 
                     actors.get(1).add(skadis2.get(j));
                     roles.get(skadis2.get(j) - 1).clear();
                     break;
                 }
             }
-            // Vi avslutar när vi har hittad en roll för skådis 1 och en för skådis 2.
-            if (actors.get(0).size() != 0) {
+            // Vi avslutar när vi har hittad en roll för både skådis 1 och en för skådis 2.
+            if (actors.get(0).size() != 0 && actors.get(1).size() != 0) {
                 break;
             }
         }
@@ -108,19 +112,24 @@ public class MainProblem {
         // System.out.println("skadis1: " + skadis1.toString());
         // System.out.println("skadis2: " + skadis2.toString());
         // System.out.println("actors: " + actors.toString());
+        // System.out.println("roles: " + roles.toString());
+        // System.out.println("scenes: " + scenes.toString());
 
-        int role;
-        int actor;
 
-        // Vi lägger till alla resterande roller till skådisar (girig)
+        // --- Vårt andra mål är att sätta alla resterande roller till skådisar (girigt)
+
+        int roll;
+        int skadis;
+
+        // Vi tilldelar de resterande skådisarna de resterande rollerna. 
         for (int i = 0; i < roles.size(); i++) {
-            if (!roles.get(i).isEmpty()) {
-                role = i + 1;
-                for (int j = 0; j < roles.get(i).size(); j++) {
-                    actor = (Integer) roles.get(i).get(j);
-                    if (actorValid(actor, role)) {
-                        actors.get(actor - 1).add(role);
-                        roles.get(i).clear();
+            if (!roles.get(i).isEmpty()) { // Om "entrie" på position (i) inte är tomt gör...
+                roll = i + 1; // Vi lägger till 1 för att indexeringen ska bli rätt för roll.
+                for (int j = 0; j < roles.get(i).size(); j++) { // Gå igenom listan på position (i).
+                    skadis = (Integer) roles.get(i).get(j); // Vi sätter skådisen till den i listan (i) på plats (j).
+                    if (isActorValidInRoll(skadis, roll)) { // Om skådisen kan spela rollen
+                        actors.get(skadis - 1).add(roll); // -1 för att få rätt index - vi lägger sedan in rollen på den positionen
+                        roles.get(i).clear();   // vi rensar på positionen (i) i roles.
                         break;
                     }
                 }
@@ -130,11 +139,16 @@ public class MainProblem {
         // System.out.println("skadis1: " + skadis1.toString());
         // System.out.println("skadis2: " + skadis2.toString());
         // System.out.println("actors: " + actors.toString());
+        // System.out.println("roles: " + roles.toString());
+        // System.out.println("scenes: " + scenes.toString());
+        
 
-        // Vi lägger till superactors (om det behövs)
+        // --- Slutligen om det fortfarande finns tomma roller lägger vi till superactors.
+        
+        //Lägger till superactors (om det behövs)
         ArrayList<Integer> superActor;
         for (int i = 0; i < roles.size(); i++) {
-            if (!roles.get(i).isEmpty()) {
+            if (!roles.get(i).isEmpty()) { // Om det fortfarande finns en roll som inte är tom så lägger vi till en superactor för att lösa problemet.
                 superActor = new ArrayList<>();
                 superActor.add(i + 1);
                 actors.add(superActor);
@@ -144,21 +158,23 @@ public class MainProblem {
         // System.out.println("skadis1: " + skadis1.toString());
         // System.out.println("skadis2: " + skadis2.toString());
         // System.out.println("actors: " + actors.toString());
+        // System.out.println("roles: " + roles.toString());
+        // System.out.println("scenes: " + scenes.toString());
 
         // System.out.println("end-----------------------");
     }
 
     /**
-     * TODO: ÄNDRA
-     * If r1 and r2 are in the same scene return false, otherwise return true.
+     * Metod för att kontrollera om rollerna är giltiga. Vi kollar alltså om roll 1 och roll 2 är i samma scen -> false
+     * om dom inte är i samma scen -> true.
      * 
-     * @param r1
-     * @param r2
+     * @param roll1
+     * @param roll2
      * @return
      */
-    boolean rolesValid(int r1, int r2) {
+    boolean isRolesValid(int roll1, int roll2) {
         for (int i = 0; i < scenes.size(); i++) {
-            if (scenes.get(i).contains(r1) && scenes.get(i).contains(r2)) {
+            if (scenes.get(i).contains(roll1) && scenes.get(i).contains(roll2)) {
                 return false;
             }
         }
@@ -166,34 +182,33 @@ public class MainProblem {
     }
 
     /**
-     * TODO: ÄNDRA
-     * If actor a can play role r without breaking any rules, return true, otherwise
-     * false.
+     * Metod för att kolla om en skådis kan spela en roll utan att den bryter mot någon regel.
+     * True om ingen regel bryts annars false.
      * 
-     * @param a
-     * @param r
+     * @param skadis
+     * @param roll
      * @return
      */
-    boolean actorValid(int a, int r) {
-        // if the actor is 1 or 2, check that all roles played by 1 and 2 isn't in same
-        // scene as r
-        if (a == 1 || a == 2) {
+    boolean isActorValidInRoll(int skadis, int roll) {
+
+        // Om det är skådis 1 eller 2 kollar vi om dessa inte spelar i samma scen.
+        if (skadis == 1 || skadis == 2) {
             for (int i = 0; i < actors.get(0).size(); i++) {
-                if (!rolesValid((Integer) actors.get(0).get(i), r)) {
+                if (!isRolesValid((Integer) actors.get(0).get(i), roll)) {
                     return false;
                 }
             }
             for (int i = 0; i < actors.get(1).size(); i++) {
-                if (!rolesValid((Integer) actors.get(1).get(i), r)) {
+                if (!isRolesValid((Integer) actors.get(1).get(i), roll)) {
                     return false;
                 }
             }
 
         }
-        // else, check that roles played by a isn't in the same scene as r
+        // Om skådisen inte är 1 eller 2 kollar vi om skådisen (skadis inte har flera rollen den spelar i samma scen.
         else {
-            for (int i = 0; i < actors.get(a - 1).size(); i++) {
-                if (!rolesValid((Integer) actors.get(a - 1).get(i), r)) {
+            for (int i = 0; i < actors.get(skadis - 1).size(); i++) {
+                if (!isRolesValid((Integer) actors.get(skadis - 1).get(i), roll)) {
                     return false;
                 }
             }
@@ -202,27 +217,32 @@ public class MainProblem {
     }
 
     /*
-     * TODO: skriv om
      * Utdataformat:
-     * Rad ett: antal skådespelare som fått roller
+     * Rad ett: antal skådespelare som fått roller.
      * En rad för varje skådespelare (som fått roller) med skådespelarens nummer,
-     * antalet roller skådespelaren tilldelats samt numren på dessa roller
+     * antalet roller skådespelaren tilldelats samt numren på dessa roller.
      */
     void printResult() {
-        int numberOfActors = 0;
+
+        // Rad ett: antal skådespelare som fått roller.
+        // Vi går igenom actors lista och där den inte är tom ökar vi numActors med 1.
+        int numActors = 0;
         for (int i = 0; i < actors.size(); i++) {
             if (actors.get(i).size() != 0) {
-                numberOfActors++;
+                numActors++;
             }
         }
-        System.out.println(numberOfActors);
+        System.out.println(numActors);
 
-        int actor;
+        // En rad för varje skådarespelare (som fått roller) med skådespelarens nummer, antalet roller skådespelaren tilldelats samt numren på dessa roller.
+        int skadis;
         for (int i = 0; i < actors.size(); i++) {
-            actor = i + 1;
+            skadis = i + 1;
             if (actors.get(i).size() != 0) {
-                System.out.print(actor + " " + actors.get(i).size() + " ");
+                // Skådespelarens nummer, antalet roller skådespelaren tilldelats.
+                System.out.print(skadis + " " + actors.get(i).size() + " ");
                 for (int j = 0; j < actors.get(i).size(); j++) {
+                    // Numren på rollerna skådespelaren har tilldelats.
                     System.out.print(actors.get(i).get(j) + " ");
                 }
                 System.out.println();
